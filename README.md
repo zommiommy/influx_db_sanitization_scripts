@@ -84,3 +84,15 @@ optional arguments:
                         Threshold time, if a measurement has no points newer than
 
 ```
+
+## Data Downsampling
+First of all we need to set a retention policy on the measurements.
+A retention policy impose an upperlimits on for how much time the data will be kept in the DB.
+```
+CREATE RETENTION POLICY "<name>" ON "<measurement>" DURATION <time> REPLICATION 1 DEFAULT
+```
+a 3 year retention policy approximately corrisponds to 156 weeks.
+
+
+To reduce the DB size we will futher downsample the data **on the same measurement**.
+This will be done by aggregating the data in windows (of e.g. 15 minutes), delete the data and write the new downsampled ones.
