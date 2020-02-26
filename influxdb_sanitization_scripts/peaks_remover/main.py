@@ -5,9 +5,9 @@ from ..core import DataGetter
 from ..core import logger
 
 FIND_QUERY = """SELECT time, {field} as value FROM "{measurement}" WHERE time > now() - {range}"""
-REMOVE_POINT = """DELETE FROM {measurement} WHERE time == {timestamp}"""
+REMOVE_POINT = """DELETE FROM {measurement} WHERE {time}"""
 
-def peaks_remover(data_getter: DataGetter, measurement: str, field: str="value", coeff:float = 1.01, window: str="10m", range: str="1d", dryrun: bool = True):
+def peaks_remover(data_getter: DataGetter, measurement: str, field: str="value", coeff:float = 1.01, window: str="10m", range: str="1d", dryrun: bool = False):
     data = data_getter.exec_query(FIND_QUERY.format(**locals()))
     df = pd.DataFrame(data)
 
@@ -26,7 +26,11 @@ def peaks_remover(data_getter: DataGetter, measurement: str, field: str="value",
         logger.info("Found %d outliers", len(outliers))
 
         if not dryrun:
-            for timestamp in tqdm(outliers.time):
-                data_getter.exec_query(REMOVE_POINT.format(**locals()))
+
+            time = " OR ".join(
+                "time = %d"%(int(timestamp) * 1_000_000_000)
+                for timestamp in outliers.time
+            )
+            data_getter.exec_query(REMOVE_POINT.format(**locals()))
 
         
