@@ -8,6 +8,26 @@ pip install --user .
 
 Then you can just use the executables in the root of the repository or import the module and call it functions.
 
+### Db settings
+By default all scripts read the configs from the file `db_settings.json` but another path can be passed with the `-dsp` argument. The file must be a json like:
+```json
+{
+    "database": "NOAA_water_database",
+    "host": "localhost",
+    "port": 8086,
+    "username": "root",
+    "password": "root",
+    "ssl": false,
+    "verify_ssl": false,
+    "timeout": 60,
+    "retries": 3,
+    "use_udp": false,
+    "udp_port": 4444,
+    "proxies": {},
+    "path": ""
+}
+```
+
 ## Peak Remover
 This scripts calculate the mean in 2 hours windows of data and remove peaks that are 3 times bigger than the mean of its window.
 The values are configurable.
