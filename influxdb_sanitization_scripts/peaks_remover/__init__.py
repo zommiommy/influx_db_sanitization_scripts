@@ -1,1 +1,1 @@
-from .main import peaks_remover
+from .main import PeaksRemover

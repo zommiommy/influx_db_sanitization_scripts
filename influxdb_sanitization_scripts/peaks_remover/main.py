@@ -1,36 +1,74 @@
 
 import pandas as pd
 from tqdm.auto import tqdm
-from ..core import DataGetter
 from ..core import logger
+from ..core import DataGetter
 
-FIND_QUERY = """SELECT time, {field} as value FROM "{measurement}" WHERE time > now() - {range}"""
+FIND_QUERY = """SELECT * FROM "{measurement}" WHERE time > now() - {range}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE {time}"""
 
-def peaks_remover(data_getter: DataGetter, measurement: str, field: str="value", coeff:float = 1.01, window: str="10m", range: str="1d", dryrun: bool = False):
-    data = data_getter.exec_query(FIND_QUERY.format(**locals()))
-    df = pd.DataFrame(data)
+class PeaksRemover:
 
-    logger.info("Got %d datapoints", len(df))
+    def __init__(self,
+        data_getter: DataGetter,
+        measurement: str,
+        field: str="value",
+        coeff:float = 1.01,
+        window: str="10m",
+        range: str="1d",
+        dryrun: bool = False
+    ):
+        self.data_getter, self.measurement, self.field = data_getter, measurement, field
+        self.coeff, self.window, self.range, self.dryrun = coeff, window, range, dryrun
 
-    if len(df) > 0:
+    def peaks_remover(self):
+        data = self.data_getter.exec_query(FIND_QUERY.format(**vars(self)))
+        df = pd.DataFrame(data)
 
         df["pd_time"] = pd.to_datetime(df.time, unit="s")
-        groups = df.groupby(pd.Grouper(key="pd_time", freq=window))
+        
+        logger.info("Got %d datapoints", len(df))
+
+        if len(df) == 0:
+            return 
+
+        labels = [
+            label
+            for label in df.columns
+            if label not in ["time", "pd_time", self.field]
+        ]
+
+        logger.info("Groupping by the values of %s", labels)
+
+        # no tags then no need to group values
+        if len(labels) == 0:
+            self.parse_and_remove(df, "the measurement %s"%self.measurement)
+            return
+        # only one tag then convert str to list the indices
+        elif len(labels) == 1:
+            for indices, data in df.groupby(labels):
+                self.parse_and_remove(data, dict(zip(labels, [indices])))
+        # more tags group by every combination
+        else:
+            for indices, data in df.groupby(labels):
+                self.parse_and_remove(data, dict(zip(labels, indices)))
+            
+
+    def parse_and_remove(self, data, indices):
+        groups = data.groupby(pd.Grouper(key="pd_time", freq=self.window))
 
         outliers = pd.concat([
-            group[group.value > coeff * group.value.mean()]
+            group[group[self.field] > self.coeff * group[self.field].mean()]
             for index, group in tqdm(groups, total=len(groups))
         ])
 
-        logger.info("Found %d outliers", len(outliers))
+        logger.info("Found %d outliers for %s", len(outliers), indices)
 
-        if not dryrun:
-
+        if not self.dryrun and len(outliers) > 0:
             time = " OR ".join(
                 "time = %d"%(int(timestamp) * 1_000_000_000)
                 for timestamp in outliers.time
             )
-            data_getter.exec_query(REMOVE_POINT.format(**locals()))
+            self.data_getter.exec_query(REMOVE_POINT.format(time=time, **vars(self)))
 
-        
+                

@@ -5,7 +5,7 @@ import sys
 import json
 import logging
 from typing import List, Tuple, Dict, Union
-from influxdb import InfluxDBClient
+from influxdb import InfluxDBClient, DataFrameClient
 
 from .logger import logger
 
@@ -28,6 +28,7 @@ class DataGetter:
         
         # Create the client passing the settings as kwargs
         self.client = InfluxDBClient(**self.settings)
+        self.dfclient = DataFrameClient(**self.settings)
 
     def __del__(self):
         """On exit / delation close the client connetion"""
@@ -37,7 +38,7 @@ class DataGetter:
     def exec_query(self, query : str):
         # Construct the query to workaround the tags distinct constraint
         query = query.replace("\\", "\\\\")
-        logger.info("Executing query [%s]"%query)
+        logger.debug("Executing query [%s]"%query)
         return list(self.client.query(query, epoch="s").get_points())
 
     def get_measurements(self) -> List[str]:
@@ -51,3 +52,6 @@ class DataGetter:
 
     def drop_measurement(self, measurement: str) -> None:
         self.client.drop_measurement(measurement)
+
+    def write_dataframe(self, df, measurement):
+        self.dfclient.write_points(df, measurement, time_precision="s")

@@ -1,6 +1,6 @@
 import logging
 from .core import DataGetter, get_common_parser, common_callback
-from .peaks_remover import peaks_remover
+from .peaks_remover import PeaksRemover
 
 description = """This scripts calculate the mean in 2 hours windows of data and remove peaks that are 3 times bigger than the mean of its window.
 The values are configurable."""
@@ -18,4 +18,4 @@ def cmd_peaks_remover():
     common_callback(values)
 
     dg = DataGetter(values.pop("db_settings_path"))
-    peaks_remover(dg, **values)
+    PeaksRemover(dg, **values).peaks_remover()
