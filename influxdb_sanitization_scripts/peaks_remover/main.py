@@ -1,8 +1,7 @@
 
 import pandas as pd
 from tqdm.auto import tqdm
-from ..core import logger
-from ..core import DataGetter
+from ..core import logger, DataGetter, get_filtered_labels
 
 FIND_QUERY = """SELECT * FROM "{measurement}" WHERE time > now() - {range}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE time = {time}"""
@@ -40,11 +39,7 @@ class PeaksRemover:
         if len(df) == 0:
             return 
 
-        labels = [
-            label
-            for label in df.columns
-            if label not in ["time", "pd_time", self.field]
-        ]
+        labels = get_filtered_labels(df, self.field)
 
         logger.info("Groupping by the values of %s", labels)
 
