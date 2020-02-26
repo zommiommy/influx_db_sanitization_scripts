@@ -1,0 +1,20 @@
+import pandas as pd
+from time import time
+from ..core import DataGetter
+from humanize import naturaldelta
+from ..core import logger
+
+MOST_RECENT_QUERY = """SELECT * FROM "{measurement}" ORDER BY ASC LIMIT 1"""
+
+def drop_dead_measurements(data_getter: DataGetter, measurement: str, dryrun: bool = True, max_time: int = 3 * 365 * 24 * 60 * 60):
+    measurements = data_getter.get_measurements()
+    logger.info("The available measurements are %s", measurements)
+    for measurement in measurements:
+        most_recent_time = data_getter.exec_query(MOST_RECENT_QUERY.format(**locals()))[0]["time"]
+        seconds_since_last_write = time() - most_recent_time
+        logger.info("%s hasn't been written to in %s", measurement, naturaldelta(seconds_since_last_write))
+        if seconds_since_last_write > max_time:
+            logger.info("Going to delete %s", measurement)
+            if not dryrun: 
+                data_getter.drop_measurement(measurement)
+
