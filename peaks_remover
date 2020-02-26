@@ -1,0 +1,2 @@
+#!/bin/bash
+python -c "import influxdb_sanitization_scripts; influxdb_sanitization_scripts.cmd_peaks_remover()" $@
