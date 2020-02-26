@@ -13,7 +13,7 @@ This scripts calculate the mean in 2 hours windows of data and remove peaks that
 The values are configurable.
 ```bash
 $ ./peaks_remover -h                                                                                                                                                                                                    ─╯
-usage: -c [-h] [-v VERBOSITY] [-dr] [-f] [-dsp DB_SETTINGS_PATH] [-c COEFF] [-w WINDOW] [-r RANGE] measurement
+usage: -c [-h] [-v VERBOSITY] [-dr] [-f] [-dsp DB_SETTINGS_PATH] [-c COEFF] [-w WINDOW] [-r RANGE] [-fi FIELD] measurement
 
 This scripts calculate the mean in 2 hours windows of data and remove peaks that are 3 times bigger than the mean of its window. The values are configurable.
 
@@ -33,7 +33,9 @@ optional arguments:
   -w WINDOW, --window WINDOW
                         How big are the chunks with which the means are computed.
   -r RANGE, --range RANGE
-                        How back the scripts goes to clean the data
+                        How back the scripts goes to clean the data.
+  -fi FIELD, --field FIELD
+                        The name of the column to use for peak deletion
 ```
 
 ## Drop Dead measurements
