@@ -37,4 +37,6 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
                 
                 data_getter.exec_query(REMOVE_POINT.format(**locals()))
 
+                # TODO write data to db
+
             
