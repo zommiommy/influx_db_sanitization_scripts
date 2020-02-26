@@ -5,7 +5,13 @@ from ..core import logger
 from ..core import DataGetter
 
 FIND_QUERY = """SELECT * FROM "{measurement}" WHERE time > now() - {range}"""
-REMOVE_POINT = """DELETE FROM {measurement} WHERE {time}"""
+REMOVE_POINT = """DELETE FROM {measurement} WHERE time = {time}"""
+
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
 
 class PeaksRemover:
 
@@ -13,13 +19,15 @@ class PeaksRemover:
         data_getter: DataGetter,
         measurement: str,
         field: str="value",
-        coeff:float = 1.01,
+        coeff:float = 100,
         window: str="10m",
         range: str="1d",
-        dryrun: bool = False
+        dryrun: bool = False,
+        chunk_size: int = 1000,
     ):
         self.data_getter, self.measurement, self.field = data_getter, measurement, field
         self.coeff, self.window, self.range, self.dryrun = coeff, window, range, dryrun
+        self.chunk_size = chunk_size
 
     def peaks_remover(self):
         data = self.data_getter.exec_query(FIND_QUERY.format(**vars(self)))
@@ -65,10 +73,11 @@ class PeaksRemover:
         logger.info("Found %d outliers for %s", len(outliers), indices)
 
         if not self.dryrun and len(outliers) > 0:
-            time = " OR ".join(
-                "time = %d"%(int(timestamp) * 1_000_000_000)
-                for timestamp in outliers.time
-            )
-            self.data_getter.exec_query(REMOVE_POINT.format(time=time, **vars(self)))
+            for chunk in tqdm(chunks(outliers.time, self.chunk_size), total=int(len(outliers) // self.chunk_size)):
+                query = " ; ".join(
+                    REMOVE_POINT.format(time=(int(timestamp) * 1_000_000_000), **vars(self))
+                    for timestamp in chunk
+                )
+                self.data_getter.exec_query(query)
 
                 

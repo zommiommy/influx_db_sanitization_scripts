@@ -39,7 +39,14 @@ class DataGetter:
         # Construct the query to workaround the tags distinct constraint
         query = query.replace("\\", "\\\\")
         logger.debug("Executing query [%s]"%query)
-        return list(self.client.query(query, epoch="s").get_points())
+        result = self.client.query(query, epoch="s")
+        if type(result) == list:
+            return [
+                list(subres.get_points())
+                for subres in result
+            ]
+            
+        return list(result.get_points())
 
     def get_measurements(self) -> List[str]:
         """Get all the measurements sul DB"""
