@@ -4,10 +4,10 @@ from tqdm.auto import tqdm
 from ..core import DataGetter
 from ..core import logger
 
-FIND_QUERY = """SELECT time, degrees as value FROM "{measurement}" WHERE time > now() - {range}"""
+FIND_QUERY = """SELECT time, {field} as value FROM "{measurement}" WHERE time > now() - {range}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE time == {timestamp}"""
 
-def peaks_remover(data_getter: DataGetter, measurement: str, coeff:float = 1.01, window: str="10m", range: str="1d", dryrun: bool = True):
+def peaks_remover(data_getter: DataGetter, measurement: str, field: str="value", coeff:float = 1.01, window: str="10m", range: str="1d", dryrun: bool = True):
     data = data_getter.exec_query(FIND_QUERY.format(**locals()))
     df = pd.DataFrame(data)
 
