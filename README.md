@@ -31,6 +31,7 @@ By default all scripts read the configs from the file `db_settings.json` but ano
 ## Peak Remover
 This scripts calculate the mean in 2 hours windows of data and remove peaks that are 3 times bigger than the mean of its window.
 The values are configurable.
+
 ```bash
 $ ./peaks_remover -h                                                                                                                                                                                                    ─╯
 usage: -c [-h] [-v VERBOSITY] [-dr] [-f] [-dsp DB_SETTINGS_PATH] [-c COEFF] [-w WINDOW] [-r RANGE] [-fi FIELD] measurement
@@ -57,6 +58,9 @@ optional arguments:
   -fi FIELD, --field FIELD
                         The name of the column to use for peak deletion
 ```
+This script is bottlenecked by the limitation of InfluxDB which does not allows (to the best of my knowledge) to delete multiple points from a measurements given their timestamp and tags).
+Currently it takes 0.04 seconds per point which means that it takes 4 seconds per 100 points.
+
 
 ## Drop Dead measurements
 If a measurement had no new data in the last 2 years, drop the measurements.
