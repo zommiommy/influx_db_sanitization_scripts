@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby
 
-FIND_QUERY = """SELECT time, {field} FROM "{measurement}" WHERE time > now() - {range}"""
+FIND_QUERY = """SELECT time, service, host, value FROM "{measurement}" WHERE time > now() - {range}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE time = {time}"""
 
 def chunks(lst, n):
@@ -17,14 +17,13 @@ class PeaksRemover:
     def __init__(self,
         data_getter: DataGetter,
         measurement: str,
-        field: str="value",
         coeff:float = 100,
         window: str="10m",
         range: str="1d",
         dryrun: bool = False,
         chunk_size: int = 1000,
     ):
-        self.data_getter, self.measurement, self.field = data_getter, measurement, field
+        self.data_getter, self.measurement = data_getter, measurement
         self.coeff, self.window, self.range, self.dryrun = coeff, window, range, dryrun
         self.chunk_size = chunk_size
 
@@ -40,12 +39,9 @@ class PeaksRemover:
 
 
         df["pd_time"] = pd.to_datetime(df.time, unit="s")
-        
-        labels = get_filtered_labels(df, self.field)
-
-        logger.info("Groupping by the values of %s", labels)
-        
-        consistent_groupby(df, labels, self.parse_and_remove)
+    
+        for indices, data in df.groupby(["hostname", "service"]):
+            self.parse_and_remove(data, dict(zip(labels, indices)))
             
 
     def parse_and_remove(self, data, indices):
