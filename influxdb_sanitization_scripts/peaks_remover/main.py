@@ -41,14 +41,14 @@ class PeaksRemover:
         df["pd_time"] = pd.to_datetime(df.time, unit="s")
     
         for indices, data in df.groupby(["hostname", "service"]):
-            self.parse_and_remove(data, dict(zip(labels, indices)))
+            self.parse_and_remove(data, dict(zip(indices, indices)))
             
 
     def parse_and_remove(self, data, indices):
         groups = data.groupby(pd.Grouper(key="pd_time", freq=self.window))
 
         outliers = pd.concat([
-            group[group[self.field] > self.coeff * group[self.field].mean()]
+            group[group.value > self.coeff * group.value.mean()]
             for index, group in tqdm(groups, total=len(groups))
         ])
 
