@@ -58,13 +58,13 @@ class PeaksRemover:
 
         outliers = pd.concat([
             group[group.value > self.coeff * group.value.mean()]
-            for index, group in tqdm(groups, total=len(groups))
+            for index, group in groups
         ])
 
         logger.info("Found %d outliers for %s", len(outliers), indices)
 
         if not self.dryrun and len(outliers) > 0:
-            for chunk in tqdm(chunks(outliers.time, self.chunk_size), total=int(len(outliers) // self.chunk_size)):
+            for chunk in chunks(outliers.time, self.chunk_size):
                 query = " ; ".join(
                     REMOVE_POINT.format(time=(int(timestamp) * 1_000_000_000), **vars(self))
                     for timestamp in chunk
