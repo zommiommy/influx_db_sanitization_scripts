@@ -1,11 +1,11 @@
 import logging
 from .core import DataGetter, get_common_parser, common_callback
-from .drop_dead_measurements import drop_dead_measurements
+from .drop_dead_tags import drop_dead_tags
 
-description = """If a measurement had no new data in the last 2 years, drop the measurements.
+description = """If a tag had no new data in the last 2 years, drop the tag from all measurements.
 The values are configurable."""
 
-def cmd_test_drop_dead_measurements():
+def cmd_test_drop_dead_tags():
     parser = get_common_parser(description)
 
     parser.add_argument("-m", "--max-time", type=float, default=1, help="Threshold time in seconds, if a measurement has no points newer than ")
@@ -14,4 +14,4 @@ def cmd_test_drop_dead_measurements():
     common_callback(values)
 
     dg = DataGetter(values.pop("db_settings_path"))
-    drop_dead_measurements(dg, **values)
+    drop_dead_tags(dg, **values)

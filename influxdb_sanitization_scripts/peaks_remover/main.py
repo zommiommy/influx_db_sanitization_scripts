@@ -1,7 +1,7 @@
 
 import pandas as pd
 from tqdm.auto import tqdm
-from ..core import logger, DataGetter, get_filtered_labels
+from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby
 
 FIND_QUERY = """SELECT * FROM "{measurement}" WHERE time > now() - {range}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE time = {time}"""
@@ -42,19 +42,8 @@ class PeaksRemover:
         labels = get_filtered_labels(df, self.field)
 
         logger.info("Groupping by the values of %s", labels)
-
-        # no tags then no need to group values
-        if len(labels) == 0:
-            self.parse_and_remove(df, "the measurement %s"%self.measurement)
-            return
-        # only one tag then convert str to list the indices
-        elif len(labels) == 1:
-            for indices, data in df.groupby(labels):
-                self.parse_and_remove(data, dict(zip(labels, [indices])))
-        # more tags group by every combination
-        else:
-            for indices, data in df.groupby(labels):
-                self.parse_and_remove(data, dict(zip(labels, indices)))
+        
+        consistent_groupby(df, labels, self.parse_and_remove)
             
 
     def parse_and_remove(self, data, indices):
