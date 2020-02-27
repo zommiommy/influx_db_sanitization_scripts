@@ -65,6 +65,7 @@ class PeaksRemover:
             return
 
         logger.info("Found %d outliers for %s", len(outliers), indices)
+        logger.info("Timestamps %s", outliers.time)
 
         if not self.dryrun:
             for chunk in chunks(outliers.time, self.chunk_size):
