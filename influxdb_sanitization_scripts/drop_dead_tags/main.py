@@ -6,7 +6,7 @@ from ..core import logger
 
 
 
-MOST_RECENT_QUERY = """SELECT time, service, hostname FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' ORDER BY time DESC LIMIT 1"""
+MOST_RECENT_QUERY = """SELECT time, service, hostname FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND time > now() - {max_time} ORDER BY time DESC LIMIT 1"""
 
 
 # Add blacklist and or whitelist
@@ -35,7 +35,12 @@ def drop_dead_tags(data_getter: DataGetter, dryrun: bool = True, max_time: int =
 
 def _drop_dead_tags(data_getter, measurement, hostname, service, dryrun, max_time):
 
-    most_recent_time = data_getter.exec_query(MOST_RECENT_QUERY.format(**locals()))[0]["time"]
+    most_recent_time = data_getter.exec_query(MOST_RECENT_QUERY.format(**locals()))
+
+    if not len(most_recent_time):
+        logger.info("%s %s %s has no data", measurement, hostname, service)
+        return
+    most_recent_time = most_recent_time
 
     seconds_since_last_write = time() - most_recent_time
 
