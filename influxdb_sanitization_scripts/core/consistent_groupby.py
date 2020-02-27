@@ -1,6 +1,6 @@
 
 
-def consistent_groupby(df, labels, function)
+def consistent_groupby(df, labels, function):
         # no tags then no need to group values
         if len(labels) == 0:
             function(df, "the measurement")
