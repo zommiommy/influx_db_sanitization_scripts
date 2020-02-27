@@ -8,7 +8,7 @@ The values are configurable."""
 def cmd_test_drop_dead_measurements():
     parser = get_common_parser(description)
 
-    parser.add_argument("-m", "--max-time", type=float, default=1, help="Threshold time in seconds, if a measurement has no points newer than ")
+    parser.add_argument("-m", "--max-time", type=int, default=1, help="Threshold time in seconds, if a measurement has no points newer than ")
     values = vars(parser.parse_args())
 
     common_callback(values)

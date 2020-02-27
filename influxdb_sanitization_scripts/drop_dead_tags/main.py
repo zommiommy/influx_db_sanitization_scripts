@@ -6,13 +6,13 @@ from ..core import logger
 
 
 
-MOST_RECENT_QUERY = """SELECT time, service, hostname FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND time > now() - {max_time:g}s ORDER BY time DESC LIMIT 1"""
+MOST_RECENT_QUERY = """SELECT time, service, hostname FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND time > now() - {max_time:d}s ORDER BY time DESC LIMIT 1"""
 
 
 # Add blacklist and or whitelist
 
 def drop_dead_tags(data_getter: DataGetter, dryrun: bool = True, max_time: int = 3 * 365 * 24 * 60 * 60):
-
+    max_time = int(max_time)
 
     services = data_getter.get_tag_values("service")
 
