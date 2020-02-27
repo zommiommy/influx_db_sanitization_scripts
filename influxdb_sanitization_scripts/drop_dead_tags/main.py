@@ -40,7 +40,8 @@ def _drop_dead_tags(data_getter, measurement, hostname, service, dryrun, max_tim
     if not len(most_recent_time):
         logger.info("%s %s %s has no data", measurement, hostname, service)
         return
-    most_recent_time = most_recent_time
+
+    most_recent_time = most_recent_time[0]["time"]
 
     seconds_since_last_write = time() - most_recent_time
 
