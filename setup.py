@@ -36,7 +36,8 @@ setup(
         "numpy",
         "pandas",
         "influxdb",
-        "humanize"
+        "humanize",
+        "tqdm"
     ],
     extras_require=extras,
 )

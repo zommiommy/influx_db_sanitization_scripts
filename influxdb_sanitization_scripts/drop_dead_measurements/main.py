@@ -4,7 +4,9 @@ from ..core import DataGetter
 from humanize import naturaldelta
 from ..core import logger
 
-MOST_RECENT_QUERY = """SELECT * FROM "{measurement}" ORDER BY ASC LIMIT 1"""
+MOST_RECENT_QUERY = """SELECT * FROM "{measurement}" ORDER BY time DESC LIMIT 1"""
+
+# Add blacklist and or whitelist
 
 def drop_dead_measurements(data_getter: DataGetter, dryrun: bool = True, max_time: int = 3 * 365 * 24 * 60 * 60):
     measurements = data_getter.get_measurements()
@@ -26,3 +28,4 @@ def drop_dead_measurements(data_getter: DataGetter, dryrun: bool = True, max_tim
         logger.info("Deleted %s", deleted_measurements)
     else:
         logger.info("No measurement was deleted.")
+        
