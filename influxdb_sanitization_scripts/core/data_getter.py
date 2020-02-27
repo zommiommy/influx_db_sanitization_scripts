@@ -12,7 +12,7 @@ from .logger import logger
 class DataGetter:
     
 
-    def __init__(self, setting_file:str = "db_settings.json"):
+    def __init__(self, setting_file= "db_settings.json"):
         """Load the settings file and connect to the DB"""
         # Get the current folder
         current_script_dir = "/".join(__file__.split("/")[:-3])
