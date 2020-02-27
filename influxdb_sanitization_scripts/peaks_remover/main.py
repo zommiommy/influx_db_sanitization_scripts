@@ -61,9 +61,12 @@ class PeaksRemover:
             for index, group in groups
         ])
 
+        if len(outliers) == 0:
+            return
+
         logger.info("Found %d outliers for %s", len(outliers), indices)
 
-        if not self.dryrun and len(outliers) > 0:
+        if not self.dryrun:
             for chunk in chunks(outliers.time, self.chunk_size):
                 query = " ; ".join(
                     REMOVE_POINT.format(time=(int(timestamp) * 1_000_000_000), **vars(self))
