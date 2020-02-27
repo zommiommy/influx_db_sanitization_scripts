@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby
 
-FIND_QUERY = """SELECT * FROM "{measurement}" WHERE time > now() - {range}"""
+FIND_QUERY = """SELECT time, {field} FROM "{measurement}" WHERE time > now() - {range}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE time = {time}"""
 
 def chunks(lst, n):
@@ -32,13 +32,15 @@ class PeaksRemover:
         data = self.data_getter.exec_query(FIND_QUERY.format(**vars(self)))
         df = pd.DataFrame(data)
 
-        df["pd_time"] = pd.to_datetime(df.time, unit="s")
-        
+
         logger.info("Got %d datapoints", len(df))
 
         if len(df) == 0:
             return 
 
+
+        df["pd_time"] = pd.to_datetime(df.time, unit="s")
+        
         labels = get_filtered_labels(df, self.field)
 
         logger.info("Groupping by the values of %s", labels)

@@ -6,7 +6,7 @@ from ..core import logger
 
 
 
-MOST_RECENT_QUERY = """SELECT time, hostname, service FROM (SELECT * FROM /.*/ WHERE time > now() - 2w) GROUP BY service, hostname ORDER BY time DESC LIMIT 1"""
+MOST_RECENT_QUERY = """SELECT time, hostname, service FROM (SELECT * FROM {measurement} WHERE time > now() - 2w) GROUP BY service, hostname ORDER BY time DESC LIMIT 1"""
 
 
 # Add blacklist and or whitelist
@@ -14,15 +14,22 @@ MOST_RECENT_QUERY = """SELECT time, hostname, service FROM (SELECT * FROM /.*/ W
 def drop_dead_tags(data_getter: DataGetter, dryrun: bool = True, max_time: int = 3 * 365 * 24 * 60 * 60):
     max_time = int(max_time)
 
-    values = data_getter.exec_query(MOST_RECENT_QUERY)
-    logger.info("Got %d combinations of hostname and service", len(values))
-    logger.debug("Got combinations %s", values)
+
+    #values = {"time":, "hostname":, "service":}
 
     measurements = data_getter.get_measurements()
     logger.info("The available measurements are %s", measurements)
 
+    for measurement in measurements:
+        values = data_getter.exec_query(MOST_RECENT_QUERY.format(**locals()))
+        logger.info("Got %d combinations of hostname and service for the measurements %s", len(values), measurement)
+        logger.debug("Got combinations %s", values)
+        for combination in values:
+            _drop_dead_tags(data_getter, measurement, combination, dryrun, max_time)
 
-def _drop_dead_tags(data_getter, measurement, hostname, service, dryrun, max_time):
+
+def _drop_dead_tags(data_getter, measurement, combination, dryrun, max_time):
+    hostname, service, time = combination["hostname"], combination["service"], combination["time"]
 
     most_recent_time = data_getter.exec_query(MOST_RECENT_QUERY.format(**locals()))
 
