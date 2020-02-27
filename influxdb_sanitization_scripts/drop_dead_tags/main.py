@@ -6,7 +6,7 @@ from ..core import logger
 
 
 
-MOST_RECENT_QUERY = """SELECT time, service, hostname FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND time > now() - {max_time:d}s ORDER BY time DESC LIMIT 1"""
+MOST_RECENT_QUERY = """SELECT time, service, hostname FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND time > now() - {max_time:g}s ORDER BY time DESC LIMIT 1"""
 
 
 # Add blacklist and or whitelist
