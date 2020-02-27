@@ -4,7 +4,7 @@ import time
 from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby, time_chunks, epoch_to_time
 
-FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' or metric = 'outBandwidth') and time >= {high:d} and time < {low:d}"""
+FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' OR metric = 'outBandwidth') and time >= {high:d} and time < {low:d}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE time = {time}"""
 
 def chunks(lst, n):
@@ -61,11 +61,18 @@ class PeaksRemover:
             for index, group in groups
         ])
 
+
+        means = [
+            group.value.mean()
+            for index, group in groups
+        ]
+
         if len(outliers) == 0:
             return
 
         logger.info("Found %d outliers for %s", len(outliers), indices)
-        logger.info("Timestamps %s", outliers.time)
+        logger.info("outliers %s", outliers)
+        logger.info("means %s", means)
 
         if not self.dryrun:
             for chunk in chunks(outliers.time, self.chunk_size):
