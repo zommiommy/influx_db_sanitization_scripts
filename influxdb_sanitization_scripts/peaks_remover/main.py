@@ -33,7 +33,7 @@ class PeaksRemover:
     def peaks_remover(self):
         start = time.time()
         for low, high in time_chunks(start, self.range, self.time_chunk):
-            logger.info("Parsing the time intervals between %s and %s seconds since now", epoch_to_time(low), epoch_to_time(high))
+            logger.info("Parsing the time intervals between %s and %s seconds since now", epoch_to_time(low / 1e9), epoch_to_time(high / 1e9))
             data = self.data_getter.exec_query(FIND_QUERY.format(**{**vars(self), **locals()}))
             self.parse_time_slot(data)
 
