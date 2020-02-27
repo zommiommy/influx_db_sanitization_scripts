@@ -1,9 +1,10 @@
 
 import pandas as pd
+import time
 from tqdm.auto import tqdm
-from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby
+from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby, time_chunks, epoch_to_time
 
-FIND_QUERY = """SELECT time, service, host, value FROM "{measurement}" WHERE time > now() - {range}"""
+FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' or metric = 'outBandwidth') and time >= {high:d} and time < {low:d}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE time = {time}"""
 
 def chunks(lst, n):
@@ -22,15 +23,22 @@ class PeaksRemover:
         range: str="1d",
         dryrun: bool = False,
         chunk_size: int = 1000,
+        time_chunk: str = "6h",
     ):
         self.data_getter, self.measurement = data_getter, measurement
         self.coeff, self.window, self.range, self.dryrun = coeff, window, range, dryrun
-        self.chunk_size = chunk_size
+        self.chunk_size, self.time_chunk = chunk_size, time_chunk
+
 
     def peaks_remover(self):
-        data = self.data_getter.exec_query(FIND_QUERY.format(**vars(self)))
-        df = pd.DataFrame(data)
+        start = time.time()
+        for low, high in time_chunks(start, self.range, self.time_chunk):
+            logger.info("Parsing the time intervals between %s and %s seconds since now", epoch_to_time(low), epoch_to_time(high))
+            data = self.data_getter.exec_query(FIND_QUERY.format(**{**vars(self), **locals()}))
+            self.parse_time_slot(data)
 
+    def parse_time_slot(self, data):
+        df = pd.DataFrame(data)
 
         logger.info("Got %d datapoints", len(df))
 
@@ -43,6 +51,7 @@ class PeaksRemover:
         for indices, data in df.groupby(["hostname", "service"]):
             self.parse_and_remove(data, dict(zip(indices, indices)))
             
+        
 
     def parse_and_remove(self, data, indices):
         groups = data.groupby(pd.Grouper(key="pd_time", freq=self.window))
