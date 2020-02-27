@@ -13,6 +13,7 @@ def cmd_peaks_remover():
     parser.add_argument("-w", "--window", type=str, default="1h", help="How big are the chunks with which the means are computed.")
     parser.add_argument("-r", "--range", type=str, default="4w", help="How back the scripts goes to clean the data.")
     parser.add_argument("-t", "--time-chunk", type=str, default="6h", help="The scripts analize separately chunks of time in order to don't timeout the queries.")
+    parser.add_argument("-m", "--max-value", type=int, default=1e8, help="The max value the point may have without being checked if outlier")
     values = vars(parser.parse_args())
 
     common_callback(values)

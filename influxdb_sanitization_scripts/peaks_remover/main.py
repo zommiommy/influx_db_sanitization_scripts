@@ -24,10 +24,11 @@ class PeaksRemover:
         dryrun: bool = False,
         chunk_size: int = 1000,
         time_chunk: str = "6h",
+        max_value: int = 1e8,
     ):
         self.data_getter, self.measurement = data_getter, measurement
         self.coeff, self.window, self.range, self.dryrun = coeff, window, range, dryrun
-        self.chunk_size, self.time_chunk = chunk_size, time_chunk
+        self.chunk_size, self.time_chunk, self.max_value = chunk_size, time_chunk, max_value
 
 
     def peaks_remover(self):
@@ -57,7 +58,7 @@ class PeaksRemover:
         groups = data.groupby(pd.Grouper(key="pd_time", freq=self.window))
 
         outliers = pd.concat([
-            group[group.value > self.coeff * group.value.mean()]
+            group[(group.value > self.max_value) & (group.value > self.coeff * group.value.mean())]
             for index, group in groups
         ])
 
