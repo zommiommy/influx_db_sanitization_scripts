@@ -66,6 +66,6 @@ class DataGetter:
     def get_tag_values(self, tag):
         result = self.exec_query("""SHOW TAG VALUES WITH KEY = "{tag}" """.format(tag=tag))
         return [
-            x["value"]
+            x["value"].trim("'")
             for x in result
         ]
