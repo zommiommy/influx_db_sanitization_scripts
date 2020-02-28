@@ -76,8 +76,8 @@ class PeaksRemover:
         logger.debug("means %s", means)
 
         if not self.dryrun:
-            for outlier in outliers:
-                outlier = outlier.iloc[0].to_dict()
+            for outlier in outliers.iterrows():
+                outlier = outlier[1].to_dict()
                 self.data_getter.exec_query(
                     REMOVE_POINT.format(
                         time=(int(outlier["time"]) * 1_000_000_000),
