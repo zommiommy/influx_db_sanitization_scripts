@@ -31,7 +31,9 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
             if not dryrun:
                 logger.info("Deleting old values")
                 
-                # data_getter.exec_query(REMOVE_POINT.format(**locals()))
+                raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
+
+                data_getter.write_dataframe()
 
                 data_getter.exec_query(REMOVE_POINT.format(
                     min=min(data.time) * 1_000_000, 
