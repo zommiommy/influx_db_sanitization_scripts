@@ -5,7 +5,7 @@ from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby, time_chunks, epoch_to_time
 
 FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' OR metric = 'outBandwidth') and time >= {high:d} and time < {low:d}"""
-REMOVE_POINT = """DELETE FROM {measurement} WHERE service = {service} AND hostname = {hostname} AND time = {time}"""
+REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time = {time}"""
 
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""

@@ -30,13 +30,14 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
 
             if not dryrun:
                 logger.info("Deleting old values")
+                
+                # data_getter.exec_query(REMOVE_POINT.format(**locals()))
+
                 data_getter.exec_query(REMOVE_POINT.format(
                     min=min(data.time) * 1_000_000, 
                     max=max(data.time) * 1_000_000
                 ))
                 
-                data_getter.exec_query(REMOVE_POINT.format(**locals()))
-
                 # TODO write data to db
 
             
