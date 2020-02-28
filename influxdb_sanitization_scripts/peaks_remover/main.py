@@ -77,10 +77,12 @@ class PeaksRemover:
 
         if not self.dryrun:
             for chunk in chunks(outliers.time, self.chunk_size):
-                query = " ; ".join(
-                    REMOVE_POINT.format(time=(int(timestamp) * 1_000_000_000), **vars(self))
-                    for timestamp in chunk
-                )
-                self.data_getter.exec_query(query)
+                for timestamp in chunk:
+                    self.data_getter.exec_query(
+                        REMOVE_POINT.format(
+                            time=(int(timestamp) * 1_000_000_000),
+                             **vars(self)
+                        )
+                    )
 
                 

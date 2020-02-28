@@ -37,7 +37,8 @@ setup(
         "pandas",
         "influxdb",
         "humanize",
-        "tqdm"
+        "tqdm",
+        "cache_decorator"
     ],
     extras_require=extras,
 )
