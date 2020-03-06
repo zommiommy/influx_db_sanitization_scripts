@@ -10,7 +10,7 @@ REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND host
 
 def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m", field:str = "value", min: str="1d", max: str="1d", dryrun: bool = False):
     combinations = {
-        tag: data_getter.exec_query(FIND_QUERY.format(measurement=measurement, tag=tag))
+        tag: data_getter.exec_query(GET_TAG_VALUES.format(measurement=measurement, tag=tag))
         for tag in ["hostname", "service", "metric"]
     }
     
