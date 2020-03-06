@@ -60,8 +60,8 @@ class DataGetter:
     def drop_measurement(self, measurement: str) -> None:
         self.client.drop_measurement(measurement)
 
-    def write_dataframe(self, df, measurement):
-        self.dfclient.write_points(df, measurement, time_precision="s")
+    def write_dataframe(self, df, measurement, tags):
+        self.dfclient.write_points(df, measurement, tags, time_precision="s")
 
     def get_tag_values(self, tag, measurement=None):
         if measurement: 
