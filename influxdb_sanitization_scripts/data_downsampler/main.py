@@ -35,12 +35,12 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
         df["hostname"] = hostname
         df["service"]  = service
         df["metric"]   = metric
+        
         logger.debug(df)
-        # Write the new points
-        logger.info("Writing the new downsampled values")
-        data_getter.write_dataframe(df, measurement + "_test")
+
         if not dryrun:
-            raise NotImplementedError("TEST SO NO DELETE")
             logger.info("Deleting the old points")
             data_getter.exec_query(REMOVE_POINT.format(**locals()))
+            logger.info("Writing the new downsampled values")
+            data_getter.write_dataframe(df, measurement + "_test")
         break
