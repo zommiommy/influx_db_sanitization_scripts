@@ -75,6 +75,10 @@ class DataDownSampler:
         
             self.write_queue.append((df, measurement, tags))
 
+        if len(self.window) == 0:
+            logger.info("The mesurement %s has no data so it's skipped", measurement)
+            return
+
         logger.info("Deleting the old points")
         self.data_getter.exec_query(REMOVE_POINT.format(**locals(), **vars(self)))
 
