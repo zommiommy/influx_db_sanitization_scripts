@@ -15,8 +15,7 @@ def get_clean_dataframe(data_getter, query):
     logger.info("Got %d datapoints", len(df))
     # Time index so it can be written
     df["time"] = pd.to_datetime(df.time, unit="s")
-    df = df.set_index("time")
-    return df
+    return df.set_index("time")
 
 def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m", start: str="1d", end: str="2d", dryrun: bool = False, backup: bool = False):
 
