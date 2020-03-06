@@ -1,7 +1,7 @@
 from .data_getter import DataGetter
 from .logger import logger, setLevel
 from .common_parser import get_common_parser
-from .common_callback import common_callback
+from .common_callback import common_callback, ask_user_to_continue
 from .get_filtered_labels import get_filtered_labels
 from .consistent_groupby import consistent_groupby
 from .parse_time import parse_time, validate_time
@@ -19,5 +19,6 @@ __all__ = [
     "get_filtered_labels",
     "consistent_groupby",
     "time_chunks",
-    "epoch_to_time"
+    "epoch_to_time",
+    "ask_user_to_continue"
 ]
