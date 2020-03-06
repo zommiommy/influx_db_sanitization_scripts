@@ -76,5 +76,3 @@ class DataDownSampler:
 
                 logger.info("Writing the new downsampled values")
                 self.data_getter.write_dataframe(df, measurement, tags)
-
-            break

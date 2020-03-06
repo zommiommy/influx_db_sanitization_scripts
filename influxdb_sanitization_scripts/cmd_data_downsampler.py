@@ -12,7 +12,7 @@ def cmd_data_downsampler():
     parser.add_argument("-s", "--start",  type=str, help="Inclusive Lower-bound of the time to be parsed")
     parser.add_argument("-w", "--window", type=str, help="How big are the chunks with which the means are computed.")
     parser.add_argument("-b", "--backup", default=False, action="store_true", help="If setted, the script will save as csv all the value on which the analysis will work")
-    parser.add_argument("-i", "--interval", type=str, default="1h", help="The analysis will be divided in intervals to bypass the timeout error")
+    parser.add_argument("-i", "--interval", type=str, default="7w", help="The analysis will be divided in intervals to bypass the timeout error")
     values = vars(parser.parse_args())
 
     validate_time(values["end"])
