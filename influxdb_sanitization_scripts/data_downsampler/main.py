@@ -19,7 +19,7 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
     
     logger.info("Got combinations %s", combinations)
 
-    for hostname, service, metric in product(combinations):
+    for hostname, service, metric in product(*combinations):
         logger.info("%s %s %s", hostname, service, metric)
 
     raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
