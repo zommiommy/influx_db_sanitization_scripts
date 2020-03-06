@@ -5,7 +5,7 @@ from ..core import logger, DataGetter, get_filtered_labels, epoch_to_time, time_
 
 BACKUP       = """SELECT * FROM "{measurement}" WHERE time <= {start} AND time >= {end}"""
 AGGREGATE    = """SELECT MEAN(value) as "value" FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time <= {start} AND time >= {end} GROUP BY time({window}) """
-REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time <= {start} AND time >= {end}"""
+REMOVE_POINT = """DELETE FROM {measurement} WHERE time <= {start} AND time >= {end}"""
 
 
 def get_clean_dataframe(data_getter, query):
@@ -55,6 +55,7 @@ class DataDownSampler:
             self._interval_downsampler(measurement, i_start, i_end) 
 
     def _interval_downsampler(self, measurement, start, end):
+        self.write_queue = []
         for hostname, service, metric in product(self.hostnames, self.services, self.metrics):
             logger.info("analyzing hostname:[%s] service:[%s] metric:[%s]", hostname, service, metric)
             # Get the data
@@ -69,10 +70,12 @@ class DataDownSampler:
                 "service" :service,
                 "metric"  :metric,
             }
-            
-            if not self.dryrun:
-                logger.info("Deleting the old points")
-                self.data_getter.exec_query(REMOVE_POINT.format(**locals(), **vars(self)))
+        
+            self.write_queue.append((df, measurement, tags))
 
-                logger.info("Writing the new downsampled values")
-                self.data_getter.write_dataframe(df, measurement, tags)
+        logger.info("Deleting the old points")
+        self.data_getter.exec_query(REMOVE_POINT.format(**locals(), **vars(self)))
+
+        logger.info("Writing the new downsampled values")
+        for args in self.write_queue:
+            self.data_getter.write_dataframe(*args)
