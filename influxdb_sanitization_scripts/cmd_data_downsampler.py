@@ -22,7 +22,7 @@ def cmd_data_downsampler():
 
     dg = DataGetter(values.pop("db_settings_path"))
 
-    measurement = values.pop("measurements")
+    measurement = values.pop("measurement")
 
     ds = DataDownSampler(dg, **values)
 
