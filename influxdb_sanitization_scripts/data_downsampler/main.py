@@ -2,9 +2,8 @@ from itertools import product
 import pandas as pd
 from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels
-
-FIND_QUERY = """SELECT time, service, hostname, metric, value FROM "{measurement}" WHERE time > now() - {range}"""
-AGGREGATE  = """SELECT time, service, hostname, metric, value FROM "{measurement}" WHERE AND time >= {min} AND time <= {max} """
+#AND time >= {min} AND time <= {max}
+AGGREGATE  = """SELECT MEAN(time), FIRST(service), FIRST(hostname), FIRST(metric), MEAN(value) FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' GROUP BY time({window}) """
 REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time >= {min} AND time <= {max}"""
 
 
@@ -16,14 +15,15 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
     metrics   = data_getter.get_tag_values("metric"  , measurement) or [""]
 
     for hostname, service, metric in product(hostnames, services, metrics):
-        logger.info("%s %s %s", hostname, service, metric)
+        logger.info("analyzing hostname:[%s] service:[%s] metric:[%s]", hostname, service, metric)
 
-    raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
-    
-    data = data_getter.exec_query(FIND_QUERY.format(**locals()))
-    df = pd.DataFrame(data)
+        data = data_getter.exec_query(AGGREGATE.format(**locals()))
+        df = pd.DataFrame(data)
+        logger.info("Got %d datapoints", len(df))
+        print(df)
+        df.to_csv("test_result.csv")
+        raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
 
-    logger.info("Got %d datapoints", len(df))
 
     if len(df) > 0:
 
