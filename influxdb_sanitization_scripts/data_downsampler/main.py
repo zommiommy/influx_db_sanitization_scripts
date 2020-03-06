@@ -13,6 +13,8 @@ def get_clean_dataframe(data_getter, query):
     # Setup the dataframe
     df = pd.DataFrame(data)
     logger.info("Got %d datapoints", len(df))
+    if len(df) == 0:
+        return []
     # Time index so it can be written
     df["time"] = pd.to_datetime(df.time, unit="s")
     return df.set_index("time")
@@ -57,6 +59,10 @@ class DataDownSampler:
             logger.info("analyzing hostname:[%s] service:[%s] metric:[%s]", hostname, service, metric)
             # Get the data
             df = get_clean_dataframe(self.data_getter, AGGREGATE.format(**locals(), **vars(self)))
+
+            if len(df) == 0:
+                logger.info("No data so this interval will be skipped")
+                continue
             # Add constant values
             tags = {
                 "hostname":hostname,
