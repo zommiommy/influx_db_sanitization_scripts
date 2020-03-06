@@ -25,7 +25,7 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
 
     if backup:
         df = get_clean_dataframe(data_getter, BACKUP.format(**locals()))
-        df.to_csv(str(poch_to_time(time())) + "_backup.csv")
+        df.to_csv(str(epoch_to_time(time())) + "_backup.csv")
 
     for hostname, service, metric in product(hostnames, services, metrics):
         logger.info("analyzing hostname:[%s] service:[%s] metric:[%s]", hostname, service, metric)
