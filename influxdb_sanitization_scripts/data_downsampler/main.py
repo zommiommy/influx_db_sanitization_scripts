@@ -34,7 +34,7 @@ class DataDownSampler:
         self.dryrun = dryrun
         self.interval = interval
         self.data_getter = data_getter
-        self.start, self.end = start, end
+        self.time_start, self.time_end = start, end
 
     def downsample_all_measurements(self):
         for measurement in self.data_getter.get_measurements():
@@ -49,7 +49,7 @@ class DataDownSampler:
         self.services  = self.data_getter.get_tag_values("service",  measurement) or [""]
         self.metrics   = self.data_getter.get_tag_values("metric",   measurement) or [""]
 
-        for i_start, i_end in time_chunks(self.start, self.end, self.interval):
+        for i_start, i_end in time_chunks(self.time_start, self.time_end, self.interval):
             self._interval_downsampler(measurement, i_start, i_end) 
 
     def _interval_downsampler(self, measurement, start, end):
