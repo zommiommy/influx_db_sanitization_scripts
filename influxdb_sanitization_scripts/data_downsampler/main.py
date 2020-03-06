@@ -3,9 +3,9 @@ from time import time
 import pandas as pd
 from ..core import logger, DataGetter, get_filtered_labels, epoch_to_time
 
-BACKUP       = """SELECT * FROM "{measurement}" WHERE time >= now() - {start} AND time <= now() - {end}"""
-AGGREGATE    = """SELECT MEAN(value) as "value" FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time >= now() - {start} AND time <= now() - {end} GROUP BY time({window}) """
-REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time >= now() - {start} AND time <= now() - {end}"""
+BACKUP       = """SELECT * FROM "{measurement}" WHERE time <= now() - {start} AND time >= now() - {end}"""
+AGGREGATE    = """SELECT MEAN(value) as "value" FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time <= now() - {start} AND time >= now() - {end} GROUP BY time({window}) """
+REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time <= now() - {start} AND time >= now() - {end}"""
 
 
 def get_clean_dataframe(data_getter, query):
