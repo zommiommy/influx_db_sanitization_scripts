@@ -12,7 +12,7 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
     combinations = {
         tag: [
             x["value"]
-            for value in 
+            for x in 
             data_getter.exec_query(GET_TAG_VALUES.format(measurement=measurement, tag=tag))
         ]
         for tag in ["hostname", "service", "metric"]
