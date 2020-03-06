@@ -35,7 +35,7 @@ class DataGetter:
         if "client" in dir(self):
             self.client.close()
 
-    def exec_query(self, query : str):
+    def exec_query(self, query):
         # Construct the query to workaround the tags distinct constraint
         query = query.replace("\\", "\\\\")
         logger.debug("Executing query [%s]"%query)
