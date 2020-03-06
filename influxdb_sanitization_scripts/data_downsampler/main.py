@@ -80,4 +80,14 @@ class DataDownSampler:
 
         logger.info("Writing the new downsampled values")
         for args in self.write_queue:
-            self.data_getter.write_dataframe(*args)
+            try:
+                self.data_getter.write_dataframe(*args)
+            except:
+                df, measurement, tags = args
+                logger.error("Can't write data for %s with tags %s", measurement, tags)
+                path = "./" 
+                path += "_".join(measurement, *list(tags.values()))
+                path += "_" + str(epoch_to_time(time())).replace(" ", "_")
+                path += "_write_error.csv"
+                logger.info("Saving the data which were not written to %s", path)
+                df.to_csv(path)
