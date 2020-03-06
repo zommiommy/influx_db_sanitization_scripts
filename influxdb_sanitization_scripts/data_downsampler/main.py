@@ -15,8 +15,6 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
     services = data_getter.get_measurements("service"  , measurement) or [""]
     metrics = data_getter.get_measurements("metric"    , measurement) or [""]
 
-    logger.info("Got combinations %s", combinations)
-
     for hostname, service, metric in product(hostnames, services, metrics):
         logger.info("%s %s %s", hostname, service, metric)
 
