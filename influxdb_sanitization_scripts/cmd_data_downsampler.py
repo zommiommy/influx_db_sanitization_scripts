@@ -29,6 +29,4 @@ def cmd_data_downsampler():
     if measurement:
         ds.downsample_single_measurement(measurement)
     else:
-        if not values["force"]:
-            ask_user_to_continue("This will downsample ALL the measurements")
         ds.downsample_all_measurements()
