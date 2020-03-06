@@ -8,7 +8,7 @@ FIND_QUERY = """SELECT time, service, hostname, metric, value FROM "{measurement
 AGGREGATE  = """SELECT time, service, hostname, metric, value FROM "{measurement}" WHERE AND time >= {min} AND time <= {max} """
 REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time >= {min} AND time <= {max}"""
 
-def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m", field:str = "value", range: str="1d", dryrun: bool = False):
+def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m", field:str = "value", min: str="1d", max: str="1d", dryrun: bool = False):
     combinations = {
         tag: data_getter.exec_query(FIND_QUERY.format(measurement=measurement, tag=tag))
         for tag in ["hostname", "service", "metric"]
