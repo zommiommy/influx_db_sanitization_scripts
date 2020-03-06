@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 from .core import DataGetter, get_common_parser, common_callback, validate_time, ask_user_to_continue
 from .data_downsampler import DataDownSampler
 
@@ -29,4 +30,6 @@ def cmd_data_downsampler():
     if measurement:
         ds.downsample_single_measurement(measurement)
     else:
+        logging.warn("Going to drop ALL measurements, press Ctrl-C if you want to stop")
+        sleep(5)
         ds.downsample_all_measurements()
