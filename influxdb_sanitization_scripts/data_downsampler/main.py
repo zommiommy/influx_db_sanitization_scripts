@@ -12,6 +12,8 @@ def get_clean_dataframe(data_getter, query):
     data = data_getter.exec_query(query)
     # Setup the dataframe
     df = pd.DataFrame(data)
+    logger.debug("%s", df)
+    logger.info("Got %d datapoints", len(df))
     # Time index so it can be written
     df["time"] = pd.to_datetime(df.time, unit="s")
     df = df.set_index("time")
@@ -35,7 +37,6 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
         df["hostname"] = hostname
         df["service"]  = service
         df["metric"]   = metric
-        logger.info("Got %d datapoints", len(df))
         # Write the new points
         if not dryrun:
             logger.info("Deleting the old points")
