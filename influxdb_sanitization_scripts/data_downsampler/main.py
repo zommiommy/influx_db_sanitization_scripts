@@ -19,6 +19,9 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
 
         data = data_getter.exec_query(AGGREGATE.format(**locals()))
         df = pd.DataFrame(data)
+        df["hostname"] = [hostname * len(df)]
+        df["service"] = [service * len(df)]
+        df["metric"] = [metric * len(df)]
         logger.info("Got %d datapoints", len(df))
         print(df)
         df.to_csv("test_result.csv")
