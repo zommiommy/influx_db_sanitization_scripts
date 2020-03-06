@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels
 #AND time >= {min} AND time <= {max}
-AGGREGATE  = """SELECT MEAN(time), MEAN(value) as "value" FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' GROUP BY time({window}) """
+AGGREGATE  = """SELECT MEAN(value) as "value" FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' GROUP BY time({window}) """
 REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time >= {min} AND time <= {max}"""
 
 
