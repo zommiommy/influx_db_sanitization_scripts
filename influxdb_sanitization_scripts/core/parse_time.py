@@ -1,10 +1,14 @@
 
 import re
 
-def parse_time(value):
+def validate_time(value):
     value = value.strip()
     if not re.match(r"\d+[smhdw]", value):
         raise ValueError("The time delta %s does not match the regex \d+[smhdw]"%value)
+    return value
+
+def parse_time(value):
+    value = validate_time(value)
     number = int(value[:-1])
     unit = value[-1]
 

@@ -1,57 +1,44 @@
 from itertools import product
+from time import time
 import pandas as pd
-from tqdm.auto import tqdm
-from ..core import logger, DataGetter, get_filtered_labels
-#AND time >= {min} AND time <= {max}
-AGGREGATE  = """SELECT MEAN(value) as "value" FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' GROUP BY time({window}) """
-REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time >= {min} AND time <= {max}"""
+from ..core import logger, DataGetter, get_filtered_labels, epoch_to_time
+
+BACKUP       = """SELECT * FROM "{measurement}" WHERE time >= now() - {start} AND time <= now() - {end}"""
+AGGREGATE    = """SELECT MEAN(value) as "value" FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time >= now() - {start} AND time <= now() - {end} GROUP BY time({window}) """
+REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time >= now() - {start} AND time <= now() - {end}"""
 
 
+def get_clean_dataframe(data_getter, query):
+    data = data_getter.exec_query()
+    # Setup the dataframe
+    df = pd.DataFrame(data)
+    # Time index so it can be written
+    df["time"] = pd.to_datetime(df.time, unit="s")
+    df = df.set_index("time")
+    return df
 
-def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m", field:str = "value", min: str="1d", max: str="1d", dryrun: bool = False):
+def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m", start: str="1d", end: str="2d", dryrun: bool = False, backup: bool = False):
 
     hostnames = data_getter.get_tag_values("hostname", measurement) or [""]
     services  = data_getter.get_tag_values("service" , measurement) or [""]
     metrics   = data_getter.get_tag_values("metric"  , measurement) or [""]
 
+    if backup:
+        df = get_clean_dataframe(data_getter, BACKUP.format(**locals()))
+        df.to_csv(str(poch_to_time(time())) + "_backup.csv")
+
     for hostname, service, metric in product(hostnames, services, metrics):
         logger.info("analyzing hostname:[%s] service:[%s] metric:[%s]", hostname, service, metric)
-
-        data = data_getter.exec_query(AGGREGATE.format(**locals()))
-        df = pd.DataFrame(data)
-        df["time"] = pd.to_datetime(df.time, unit="s")
-        df = df.set_index("time")
+        # Get the data
+        df = get_clean_dataframe(data_getter, AGGREGATE.format(**locals()))
+        # Add constant values
         df["hostname"] = hostname
         df["service"]  = service
         df["metric"]   = metric
         logger.info("Got %d datapoints", len(df))
-        print(df)
+        # Write the new points
+        logger.info("Deleting the old points")
+        data_getter.exec_query(REMOVE_POINT.format(**locals()))
+        logger.info("Writing the new downsampled values")
         data_getter.write_dataframe(df, measurement + "_test")
-        raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
-
-
-    if len(df) > 0:
-
-        df["pd_time"] = pd.to_datetime(df.time, unit="s")
-        
-        for indices, data in df.groupby(["hostname", "service", "metric"]):
-            groups = data.groupby(pd.Grouper(key="pd_time", freq=window))
-
-            downsampled = pd.concat([
-                (group.time.min(), group.value.mean()) 
-                for index, group in tqdm(groups, total=len(groups))
-            ])
-
-            logger.info("Downsampled to %d points from %d for %s", len(downsampled), len(data), indices)
-
-            if not dryrun:
-                logger.info("Deleting old values")
-
-                data_getter.write_dataframe(downsampled)
-                
-                raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
-
-                data_getter.exec_query(REMOVE_POINT.format(
-                    min=min(data.time) * 1_000_000, 
-                    max=max(data.time) * 1_000_000
-                ))
+        break
