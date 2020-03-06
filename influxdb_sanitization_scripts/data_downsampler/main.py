@@ -9,7 +9,7 @@ REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND host
 
 
 def get_clean_dataframe(data_getter, query):
-    data = data_getter.exec_query()
+    data = data_getter.exec_query(query)
     # Setup the dataframe
     df = pd.DataFrame(data)
     # Time index so it can be written
