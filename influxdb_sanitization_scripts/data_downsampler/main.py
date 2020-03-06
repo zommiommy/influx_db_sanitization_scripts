@@ -23,8 +23,7 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
         df["service"]  = service
         df["metric"]   = metric
         logger.info("Got %d datapoints", len(df))
-        print(df)
-        df.to_csv("test_result.csv")
+        data_getter.write_dataframe(df, measurement + "_test")
         raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
 
 
