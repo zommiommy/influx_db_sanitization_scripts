@@ -36,6 +36,7 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
         df["hostname"] = hostname
         df["service"]  = service
         df["metric"]   = metric
+        logger.debug(df)
         # Write the new points
         logger.info("Writing the new downsampled values")
         data_getter.write_dataframe(df, measurement + "_test")
