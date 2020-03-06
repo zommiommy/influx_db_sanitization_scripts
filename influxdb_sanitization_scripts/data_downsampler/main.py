@@ -3,10 +3,21 @@ import pandas as pd
 from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels
 
-FIND_QUERY = """SELECT time, {field} as value FROM "{measurement}" WHERE time > now() - {range}"""
-REMOVE_POINT = """DELETE FROM {measurement} WHERE time >= {min} and time <= {max}"""
+GET_TAG_VALUES = """SHOW TAG VALUES FROM "{measurement}" WITH KEY = "{tag}""""
+FIND_QUERY = """SELECT time, service, hostname, metric, value FROM "{measurement}" WHERE time > now() - {range}"""
+AGGREGATE  = """SELECT time, service, hostname, metric, value FROM "{measurement}" WHERE AND time >= {min} AND time <= {max} """
+REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time >= {min} AND time <= {max}"""
 
 def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m", field:str = "value", range: str="1d", dryrun: bool = False):
+    combinations = {
+        tag: data_getter.exec_query(FIND_QUERY.format(measurement=measurement, tag=tag))
+        for tag in ["hostname", "service", "metric"]
+    }
+    
+    logger.info("Got combinations {}", combinations)
+
+    raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
+    
     data = data_getter.exec_query(FIND_QUERY.format(**locals()))
     df = pd.DataFrame(data)
 
@@ -16,9 +27,7 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
 
         df["pd_time"] = pd.to_datetime(df.time, unit="s")
         
-        labels = get_filtered_labels(df, field)
-
-        for indices, data in df.groupby(labels):
+        for indices, data in df.groupby(["hostname", "service", "metric"]):
             groups = data.groupby(pd.Grouper(key="pd_time", freq=window))
 
             downsampled = pd.concat([
@@ -30,16 +39,12 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
 
             if not dryrun:
                 logger.info("Deleting old values")
+
+                data_getter.write_dataframe(downsampled)
                 
                 raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
-
-                data_getter.write_dataframe()
 
                 data_getter.exec_query(REMOVE_POINT.format(
                     min=min(data.time) * 1_000_000, 
                     max=max(data.time) * 1_000_000
                 ))
-                
-                # TODO write data to db
-
-            
