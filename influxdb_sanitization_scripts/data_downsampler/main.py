@@ -1,4 +1,4 @@
-
+from itertools import product
 import pandas as pd
 from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels
@@ -9,16 +9,18 @@ AGGREGATE  = """SELECT time, service, hostname, metric, value FROM "{measurement
 REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time >= {min} AND time <= {max}"""
 
 def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m", field:str = "value", min: str="1d", max: str="1d", dryrun: bool = False):
-    combinations = {
-        tag: [
-            x["value"]
+    combinations = [
+         [
             for x in 
             data_getter.exec_query(GET_TAG_VALUES.format(measurement=measurement, tag=tag))
         ]
         for tag in ["hostname", "service", "metric"]
-    }
+    ]
     
     logger.info("Got combinations %s", combinations)
+
+    for hostname, service, metric in product(combinations):
+        logger.info("%s %s %s", hostname, service, metric)
 
     raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")
     
