@@ -12,7 +12,6 @@ def get_clean_dataframe(data_getter, query):
     data = data_getter.exec_query(query)
     # Setup the dataframe
     df = pd.DataFrame(data)
-    logger.debug("%s", df)
     logger.info("Got %d datapoints", len(df))
     # Time index so it can be written
     df["time"] = pd.to_datetime(df.time, unit="s")
@@ -41,6 +40,7 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
         logger.info("Writing the new downsampled values")
         data_getter.write_dataframe(df, measurement + "_test")
         if not dryrun:
+            raise NotImplementedError("TEST SO NO DELETE")
             logger.info("Deleting the old points")
             data_getter.exec_query(REMOVE_POINT.format(**locals()))
         break
