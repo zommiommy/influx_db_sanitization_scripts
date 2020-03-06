@@ -1,1 +1,1 @@
-from .main import data_downsampler
+from .main import DataDownSampler

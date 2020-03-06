@@ -1,7 +1,9 @@
-
+from time import time as now
 from .parse_time import parse_time
 
 def time_chunks(start, delta, chunk):
+    start = now() - parse_time(start)
+
     k = 1_000_000_000
     time = parse_time(delta)
     chunk = parse_time(chunk)
