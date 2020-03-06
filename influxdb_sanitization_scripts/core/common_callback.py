@@ -2,6 +2,12 @@ import sys
 import logging
 from .logger import logger, setLevel
 
+def ask_user_to_continue():
+    value = input("Do you want to continue? [y/N]\n")
+    if not value.startswith("y"):
+        sys.exit(0)
+
+
 def common_callback(values):
     verbosity = values.pop("verbosity")
     if verbosity == 0:
@@ -13,6 +19,4 @@ def common_callback(values):
 
     if not values.pop("force"):
         print("This could delete data. Please make a backup if you don't already have one.")
-        value = input("Do you want to continue? [y/N]\n")
-        if not value.startswith("y"):
-            sys.exit(0)
+        ask_user_to_continue()

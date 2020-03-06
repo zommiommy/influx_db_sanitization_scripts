@@ -1,5 +1,5 @@
 import logging
-from .core import DataGetter, get_common_parser, common_callback, validate_time
+from .core import DataGetter, get_common_parser, common_callback, validate_time, ask_user_to_continue
 from .data_downsampler import DataDownSampler
 
 description = """This scripts take the values between 6 month and 2 years and downsample them by aggregating values from windows of 15 minutes."""
@@ -29,4 +29,6 @@ def cmd_data_downsampler():
     if measurement:
         ds.downsample_single_measurement(measurement)
     else:
+        print("This will downsample ALL the measurements")
+        ask_user_to_continue()
         ds.downsample_all_measurements()
