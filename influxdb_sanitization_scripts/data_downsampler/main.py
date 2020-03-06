@@ -15,6 +15,8 @@ def get_clean_dataframe(data_getter, query):
     logger.info("Got %d datapoints", len(df))
     if len(df) == 0:
         return []
+    # ensure that all values are floats
+    df["value"] = df.value.astype(float)
     # Time index so it can be written
     df["time"] = pd.to_datetime(df.time, unit="s")
     return df.set_index("time")
