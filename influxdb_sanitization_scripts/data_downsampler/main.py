@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels
 
-GET_TAG_VALUES = """SHOW TAG VALUES FROM "{measurement}" WITH KEY = "{tag}""""
+GET_TAG_VALUES = """SHOW TAG VALUES FROM "{measurement}" WITH KEY = "{tag}" """
 FIND_QUERY = """SELECT time, service, hostname, metric, value FROM "{measurement}" WHERE time > now() - {range}"""
 AGGREGATE  = """SELECT time, service, hostname, metric, value FROM "{measurement}" WHERE AND time >= {min} AND time <= {max} """
 REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time >= {min} AND time <= {max}"""
