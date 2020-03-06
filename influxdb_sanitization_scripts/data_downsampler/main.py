@@ -3,23 +3,21 @@ import pandas as pd
 from tqdm.auto import tqdm
 from ..core import logger, DataGetter, get_filtered_labels
 
-GET_TAG_VALUES = """SHOW TAG VALUES FROM "{measurement}" WITH KEY = "{tag}" """
 FIND_QUERY = """SELECT time, service, hostname, metric, value FROM "{measurement}" WHERE time > now() - {range}"""
 AGGREGATE  = """SELECT time, service, hostname, metric, value FROM "{measurement}" WHERE AND time >= {min} AND time <= {max} """
 REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time >= {min} AND time <= {max}"""
 
+
+
 def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m", field:str = "value", min: str="1d", max: str="1d", dryrun: bool = False):
-    combinations = [
-         [
-            x["value"]
-            for x in data_getter.exec_query(GET_TAG_VALUES.format(measurement=measurement, tag=tag))
-        ]
-        for tag in ["hostname", "service", "metric"]
-    ]
-    
+
+    hostnames = data_getter.get_measurements("hostname", measurement) or [""]
+    services = data_getter.get_measurements("service"  , measurement) or [""]
+    metrics = data_getter.get_measurements("metric"    , measurement) or [""]
+
     logger.info("Got combinations %s", combinations)
 
-    for hostname, service, metric in product(*combinations):
+    for hostname, service, metric in product(hostnames, services, metrics):
         logger.info("%s %s %s", hostname, service, metric)
 
     raise NotImplementedError("QUESTO VA CONTROLLATO INSIEME")

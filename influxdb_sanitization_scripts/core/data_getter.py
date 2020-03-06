@@ -63,9 +63,12 @@ class DataGetter:
     def write_dataframe(self, df, measurement):
         self.dfclient.write_points(df, measurement, time_precision="s")
 
-    def get_tag_values(self, tag):
-        result = self.exec_query("""SHOW TAG VALUES WITH KEY = "{tag}" """.format(tag=tag))
+    def get_tag_values(self, tag, measurement=None):
+        if measurement: 
+            query = """SHOW TAG VALUES FROM "{measurement}" WITH KEY = "{tag}" """.format(measurement=measurement, tag=tag)
+        else:
+            query = """SHOW TAG VALUES WITH KEY = "{tag}" """.format(tag=tag)
         return [
             x["value"].strip("'")
-            for x in result
+            for x in self.exec_query(query)
         ]
