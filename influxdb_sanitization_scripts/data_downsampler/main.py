@@ -19,6 +19,7 @@ def data_downsampler(data_getter: DataGetter, measurement: str, window: str="10m
 
         data = data_getter.exec_query(AGGREGATE.format(**locals()))
         df = pd.DataFrame(data)
+        df..set_index('time')
         df["hostname"] = hostname
         df["service"]  = service
         df["metric"]   = metric
