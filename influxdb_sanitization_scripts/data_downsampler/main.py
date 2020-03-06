@@ -42,7 +42,7 @@ class DataDownSampler:
 
     def downsample_single_measurement(self, measurement):
         if self.backup:
-            df = get_clean_dataframe(self.data_getter, BACKUP.format(**locals()))
+            df = get_clean_dataframe(self.data_getter, BACKUP.format(**locals(), **vars(self)))
             df.to_csv(measurement + str(epoch_to_time(time())) + "_backup.csv")
 
         self.hostnames = self.data_getter.get_tag_values("hostname", measurement) or [""]
@@ -56,7 +56,7 @@ class DataDownSampler:
         for hostname, service, metric in product(self.hostnames, self.services, self.metrics):
             logger.info("analyzing hostname:[%s] service:[%s] metric:[%s]", hostname, service, metric)
             # Get the data
-            df = get_clean_dataframe(self.data_getter, AGGREGATE.format(**locals()))
+            df = get_clean_dataframe(self.data_getter, AGGREGATE.format(**locals(), **vars(self)))
             # Add constant values
             tags = {
                 "hostname":hostname,
@@ -66,8 +66,8 @@ class DataDownSampler:
             
             if not self.dryrun:
                 logger.info("Deleting the old points")
-                self.data_getter.exec_query(REMOVE_POINT.format(**locals()))
-                
+                self.data_getter.exec_query(REMOVE_POINT.format(**locals(), **vars(self)))
+
                 logger.info("Writing the new downsampled values")
                 self.data_getter.write_dataframe(df, measurement, tags)
 
