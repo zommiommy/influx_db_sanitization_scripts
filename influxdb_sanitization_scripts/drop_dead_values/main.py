@@ -65,7 +65,7 @@ def drop_dead_values_specific(data_getter, dryrun, max_time, measurement, hostna
             logger.info("Found values for measurement %s hostname %s service %s metric %s in the last %s", measurement, hostname, service, metric, naturaldelta(int(time_delta_new[:-1])))
             break
     else:   
-        logger.info("Not found values for measurement %s hostname %s service %s metric %s",  measurement, hostname, service, metric)
-        logger.info("Going to delete the values")
+        logger.warn("Not found values for measurement %s hostname %s service %s metric %s",  measurement, hostname, service, metric)
+        logger.warn("Going to delete the values")
         if not dryrun:
             data_getter.exec_query(DELETE_VALUES.format(**locals()))

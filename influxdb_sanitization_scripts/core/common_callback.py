@@ -14,6 +14,8 @@ def common_callback(values):
     if verbosity == 0:
         setLevel(logging.CRITICAL)
     elif verbosity == 1:
+        setLevel(logging.WARN)
+    elif verbosity == 2:
         setLevel(logging.INFO)
     else: 
         setLevel(logging.DEBUG)
