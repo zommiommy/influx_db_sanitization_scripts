@@ -11,10 +11,10 @@ DELETE_VALUES = """DELETE FROM "{measurement}" WHERE hostname = '{hostname}' AND
 def time_sample_scheduler(max_time, min_time=3600):
     t = min_time
     while t < max_time:
-        yield int(t)
+        yield "%ss"%int(t)
         t *= 1.7
     
-    yield max_time
+    yield "%ss"%int(max_time)
 
 
 def drop_dead_values_dispatcher(data_getter, dryrun, max_time, measurement, hostname, service, metric):
