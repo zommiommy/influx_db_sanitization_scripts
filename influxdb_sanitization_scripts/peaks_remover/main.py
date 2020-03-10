@@ -48,8 +48,8 @@ class PeaksRemover:
 
         df["pd_time"] = pd.to_datetime(df.time, unit="s")
     
-        for indices, data in df.groupby(["hostname", "service"]):
-            self.parse_and_remove(data, dict(zip(["hostname", "service"], indices)))
+        for indices, data in df.groupby(["hostname", "service", "metric"]):
+            self.parse_and_remove(data, dict(zip(["hostname", "service", "metric"], indices)))
             
         
 
@@ -71,6 +71,7 @@ class PeaksRemover:
             return
 
         logger.info("Found %d outliers for %s", len(outliers), indices)
+        logger.info("These outliers were at %s", list(outliers.time.values()))
         logger.debug("outliers %s", outliers)
         logger.debug("means %s", means)
 
