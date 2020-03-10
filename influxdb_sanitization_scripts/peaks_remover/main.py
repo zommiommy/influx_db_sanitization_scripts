@@ -49,8 +49,6 @@ class PeaksRemover:
     def get_tags_to_parse(self, measurement):
         self.hostnames = self.get_tag_set(measurement, "hostname", self.hostname, False)
         logger.info("Found hostnames %s", self.hostnames)
-        self.services  = self.get_tag_set(measurement, "service", self.service, False)
-        logger.info("Found services %s", self.services)
 
 
     def peaks_remover(self):
@@ -75,9 +73,13 @@ class PeaksRemover:
             for key, val in df.groupby(["hostname", "service", "metric"])
         }
 
-        for hostname, service, metric in product(self.hostname, self.services, ["inBandwidth", "outBandwidth"]):
-            self.parse_and_remove(groups[(hostname, service, metric)], dict(zip(["hostname", "service", "metric"], [hostname, service, metric])))
-            
+        for hostname in self.hostname:
+            services  = self.get_tag_set(self.measurement, "service", self.service, {"hostname":hostname}, False)
+            logger.debug("Found services %s", services)
+            for service in services:
+                for metric in ["inBandwidth", "outBandwidth"]:
+                    self.parse_and_remove(groups[(hostname, service, metric)], dict(zip(["hostname", "service", "metric"], [hostname, service, metric])))
+        
         
 
     def parse_and_remove(self, data, indices):
