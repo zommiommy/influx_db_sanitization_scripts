@@ -12,6 +12,7 @@ def cmd_test_drop_dead_values():
     parser.add_argument("-s", "--service", type=str, default="None", help="The service to select")
     parser.add_argument("-m", "--metric", type=str, default="None", help="The metric to select")
     parser.add_argument("-M", "--measurement", type=str, default="None", help="The measurement to select")
+    parser.add_argument("-w", "--workers", type=int, default=1, help="How many query to execute in parallel")
     values = vars(parser.parse_args())
 
     common_callback(values)
