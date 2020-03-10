@@ -43,14 +43,17 @@ class DropDeadValues:
         for measurement in measurements:
             self.drop_dead_values_per_measurement(measurement)
 
-    def get_tag_set(self, measurement, tag, value, constraint=None):
+    def get_tag_set(self, measurement, tag, value, constraint=None, nullable=True):
         if value and value != "None":
             return [value]
-        return self.data_getter.get_tag_values(tag, measurement, constraint) + [""]
+        result = self.data_getter.get_tag_values(tag, measurement, constraint)
+        if nullable:
+            result += [""]
+        return result
 
     def drop_dead_values_per_measurement(self, measurement, hostname=None, service=None, metric=None):
             
-            hostnames = self.get_tag_set(measurement, "hostname", hostname)
+            hostnames = self.get_tag_set(measurement, "hostname", hostname, nullable=False)
             logger.info("Found hostnames %s", hostnames)
             
             if self.use_processes:
@@ -61,7 +64,7 @@ class DropDeadValues:
             with pool(max_workers=self.workers) as executor:
                 for hostname in hostnames:
                     services  = self.get_tag_set(measurement, "service", service, {"hostname":hostname})
-                    logger.info("Found services %s", services)
+                    logger.info("Found services %s for hostname %s", services, hostname)
                     for service in services:
                         executor.submit(self.drop_dead_values_specific, measurement, hostname, service, metric)
 
@@ -70,7 +73,7 @@ class DropDeadValues:
             metrics = self.get_tag_set(measurement, "metric", metric, {"hostname":hostname, "service":service})
         else:
             metrics = [metric]
-        logger.info("Found metrics %s", metrics)
+        logger.info("Found metrics %s for hostname %s service %s", metrics, hostname, service)
         for metric in metrics:
             logger.info("Analyzing %s %s %s %s", measurement, hostname, service, metric)
             for time_delta_old, time_delta_new in pair_times_scheduler(self.max_time):
