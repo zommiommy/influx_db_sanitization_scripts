@@ -16,8 +16,8 @@ def cmd_test_drop_dead_values():
     parser = get_common_parser(description)
 
     parser.add_argument("-t", "--max-time", type=str, default="52w", help="Threshold time, if a measurement has no points newer than the threshold")
-    parser.add_argument("-H", "--hostname", type=str, default="None", help="The hostname to select")
-    parser.add_argument("-s", "--service", type=str, default="None", help="The service to select")
+    parser.add_argument("-H", "--hostname", type=str, nargs='+', default="None", help="The hostname to select")
+    parser.add_argument("-s", "--service", type=str, nargs='+', default="None", help="The service to select")
     parser.add_argument("-m", "--metric", type=str, default="None", help="The metric to select")
     parser.add_argument("-M", "--measurement", type=str, default="None", help="The measurement to select")
     parser.add_argument("-w", "--workers", type=int, default=1, help="How many query to execute in parallel")
@@ -26,6 +26,11 @@ def cmd_test_drop_dead_values():
     values = vars(parser.parse_args())
 
     common_callback(values)
+
+    if type(values["service"]) == list:
+        values["service"] = " ".join(values["service"])
+    if type(values["hostname"]) == list:
+        values["hostname"] = " ".join(values["hostname"])
 
     dg = DataGetter(values.pop("db_settings_path"))
     

@@ -29,8 +29,10 @@ def cmd_peaks_remover():
 
     common_callback(values)
 
-    values["service"] = " ".join(values["service"])
-    values["hostname"] = " ".join(values["hostname"])
+    if type(values["service"]) == list:
+        values["service"] = " ".join(values["service"])
+    if type(values["hostname"]) == list:
+        values["hostname"] = " ".join(values["hostname"])
 
     dg = DataGetter(values.pop("db_settings_path"))
     PeaksRemover(dg, **values).peaks_remover()
