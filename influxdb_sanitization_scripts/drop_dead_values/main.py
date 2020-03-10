@@ -65,7 +65,7 @@ class DropDeadValues:
                     executor.submit(self.drop_dead_values_specific, measurement, hostname, service, metric)
 
     def drop_dead_values_specific(self, measurement, hostname, service, metric):
-        if not metric:
+        if not metric or metric == "None":
             metrics = self.get_tag_set(measurement, "metric", metric, {"hostname":hostname, "service":service})
         else:
             metrics = [metric]
