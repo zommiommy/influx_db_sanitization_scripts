@@ -34,7 +34,7 @@ def drop_dead_values(data_getter: DataGetter, dryrun: bool = True, max_time: int
         drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement)
 
 def get_tag_set(data_getter, measurement, tag, value):
-    if value:
+    if value and value != "None":
         return [value]
     return data_getter.get_tag_values(tag, measurement) or [""]
 
