@@ -78,6 +78,7 @@ class PeaksRemover:
             logger.debug("Found services %s", services)
             for service in services:
                 for metric in ["inBandwidth", "outBandwidth"]:
+                    logger.info("Checking measurement [%s] hostname [%s] service [%s] metric [%s]", self.measurement, hostname, service, metric)
                     self.parse_and_remove(groups[(hostname, service, metric)], dict(zip(["hostname", "service", "metric"], [hostname, service, metric])))
         
         
