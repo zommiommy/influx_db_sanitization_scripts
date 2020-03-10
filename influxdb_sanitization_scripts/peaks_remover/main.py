@@ -77,7 +77,7 @@ class PeaksRemover:
 
         df["pd_time"] = pd.to_datetime(df.time, unit="s")
 
-        groups = data.groupby(pd.Grouper(key="pd_time", freq=self.window))
+        groups = df.groupby(pd.Grouper(key="pd_time", freq=self.window))
 
         outliers = pd.concat([
             group[(group.value > self.max_value) & (group.value > self.coeff * group.value.mean())]
