@@ -104,9 +104,9 @@ class PeaksRemover:
                 self.data_getter.exec_query(
                     REMOVE_POINT.format(
                         time=(int(outlier["time"]) * 1_000_000_000),
-                        service=outlier["service"],
-                        hostname=outlier["hostname"],
-                        metric=outliers["metric"],
+                        service=indices["service"],
+                        hostname=indices["hostname"],
+                        metric=indices["metric"],
                         measurement=self.measurement,
                     )
                 )
