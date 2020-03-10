@@ -79,7 +79,7 @@ class DataDownSampler:
         self._delete_and_write_points(measurement)
 
         
-    def _interval_downsampler(self, measurement, start, end):
+    def _interval_downsampler(self, measurement, start, end, hostname, service, metric):
         logger.info("analyzing measurement:[%s] hostname:[%s] service:[%s] metric:[%s]", measurement, hostname, service, metric)
         # Get the data
         df = get_clean_dataframe(self.data_getter, AGGREGATE.format(**locals(), **vars(self)))
