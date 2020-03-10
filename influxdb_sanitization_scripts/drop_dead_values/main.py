@@ -58,7 +58,7 @@ class DropDeadValues:
 
             with ThreadPoolExecutor(max_workers=self.workers) as executor:
                 for hostname, service, metric in product(hostnames, services, metrics):
-                    executor.submit(self.drop_dead_values_specific, measurement, hostnames, service, metric)
+                    executor.submit(self.drop_dead_values_specific, measurement, hostname, service, metric)
 
     def drop_dead_values_specific(self, measurement, hostname, service, metric):
         logger.info("Analyzing %s %s %s %s", measurement, hostname, service, metric)
