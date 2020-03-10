@@ -55,7 +55,7 @@ def drop_dead_values_specific(data_getter, dryrun, max_time, measurement, hostna
     for time_delta in time_sample_scheduler(max_time):
         data = data_getter.exec_query(EXAMINE_TIME_INTERVAL.format(**locals()))
         if len(data) == 1:
-            logger.info("Found values for measurement %s hostname %s service %s metric %s in the last %s", measurement, hostname, service, metric, naturaldelta(time_delta))
+            logger.info("Found values for measurement %s hostname %s service %s metric %s in the last %s", measurement, hostname, service, metric, naturaldelta(int(time_delta[:-1])))
             break
     else:   
         logger.info("Not found values for measurement %s hostname %s service %s metric %s",  measurement, hostname, service, metric)
