@@ -5,16 +5,23 @@ from humanize import naturaldelta
 from itertools import product
 from ..core import logger
 
-EXAMINE_TIME_INTERVAL = """SELECT * FROM "{measurement}" WHERE hostname = '{hostname}' AND service = '{service}' AND metric = '{metric}' AND time > now() - {time_delta} LIMIT 1"""
+EXAMINE_TIME_INTERVAL = """SELECT * FROM "{measurement}" WHERE hostname = '{hostname}' AND service = '{service}' AND metric = '{metric}' AND time > now() - {time_delta_new}  AND time < now() - {time_delta_old} LIMIT 1"""
 DELETE_VALUES = """DELETE FROM "{measurement}" WHERE hostname = '{hostname}' AND service = '{service}' AND metric = '{metric}' """
 
-def time_sample_scheduler(max_time, min_time=15*60):
+def time_sample_scheduler(max_time, min_time):
     t = min_time
     while t < max_time:
         yield "%ss"%int(t)
         t *= 2
     
     yield "%ss"%int(max_time)
+
+def pair_times_scheduler(max_time, min_time=15*60):
+    old = "0s"
+    for new in time_sample_scheduler(max_time, min_time):
+        yield old, new
+        old = new
+
 
 
 def drop_dead_values_dispatcher(data_getter, dryrun, max_time, measurement, hostname, service, metric):
@@ -52,10 +59,10 @@ def drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement,
             drop_dead_values_specific(data_getter, dryrun, max_time, measurement, hostname, service, metric)
 
 def drop_dead_values_specific(data_getter, dryrun, max_time, measurement, hostname, service, metric):
-    for time_delta in time_sample_scheduler(max_time):
+    for time_delta_old, time_delta_new in pair_times_scheduler(max_time):
         data = data_getter.exec_query(EXAMINE_TIME_INTERVAL.format(**locals()))
         if len(data) == 1:
-            logger.info("Found values for measurement %s hostname %s service %s metric %s in the last %s", measurement, hostname, service, metric, naturaldelta(int(time_delta[:-1])))
+            logger.info("Found values for measurement %s hostname %s service %s metric %s in the last %s", measurement, hostname, service, metric, naturaldelta(int(time_delta_new[:-1])))
             break
     else:   
         logger.info("Not found values for measurement %s hostname %s service %s metric %s",  measurement, hostname, service, metric)
