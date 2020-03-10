@@ -47,9 +47,9 @@ class PeaksRemover:
         return result
 
     def get_tags_to_parse(self, measurement):
-        self.hostnames = self.get_tag_set(measurement, "hostname", self.hostname, nullable=False)
+        self.hostnames = self.get_tag_set(measurement, "hostname", self.hostname, False)
         logger.info("Found hostnames %s", self.hostnames)
-        self.services  = self.get_tag_set(measurement, "service", self.service, nullable=False)
+        self.services  = self.get_tag_set(measurement, "service", self.service, False)
         logger.info("Found services %s", self.services)
 
 
