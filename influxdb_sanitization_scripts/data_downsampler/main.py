@@ -42,6 +42,7 @@ class DataDownSampler:
 
     def downsample_all_measurements(self):
         for measurement in self.data_getter.get_measurements():
+            logger.info("Working on measurement [%s]", measurement)
             self.downsample_single_measurement(measurement)
 
     def downsample_single_measurement(self, measurement):
