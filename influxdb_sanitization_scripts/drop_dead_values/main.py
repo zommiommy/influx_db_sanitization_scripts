@@ -17,6 +17,13 @@ def time_sample_scheduler(max_time, min_time=3600):
     yield max_time
 
 
+def drop_dead_values_dispatcher(data_getter, dryrun, max_time, measurement, hostname, service, metric):
+    if measurement:
+        drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement, hostname, service, metric)
+    else:
+        drop_dead_values(data_getter, dryrun, max_time)
+
+
 # Add blacklist and or whitelist
 
 def drop_dead_values(data_getter: DataGetter, dryrun: bool = True, max_time: int = 3 * 365 * 24 * 60 * 60):
@@ -26,12 +33,12 @@ def drop_dead_values(data_getter: DataGetter, dryrun: bool = True, max_time: int
     for measurement in measurements:
         drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement)
 
-def drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement):
-        hostnames = data_getter.get_tag_values("hostname", measurement) or [""]
+def drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement, hostname=None, service=None, metric=None):
+        hostnames = [hostname] or data_getter.get_tag_values("hostname", measurement) or [""]
         logger.info("Found hostnames %s", hostnames)
-        services  = data_getter.get_tag_values("service",  measurement) or [""]
+        services  = [service] or data_getter.get_tag_values("service",  measurement) or [""]
         logger.info("Found services %s", services)
-        metrics   = data_getter.get_tag_values("metric",   measurement) or [""]
+        metrics   = [metric] or data_getter.get_tag_values("metric",   measurement) or [""]
         logger.info("Found metrics %s", metrics)
 
         for hostname, service, metric in product(hostnames, services, metrics):
