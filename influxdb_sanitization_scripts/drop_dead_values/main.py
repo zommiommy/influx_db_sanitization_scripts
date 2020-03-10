@@ -43,7 +43,7 @@ class DropDeadValues:
         for measurement in measurements:
             self.drop_dead_values_per_measurement(measurement)
 
-    def get_tag_set(self, measurement, tag, value, constraint):
+    def get_tag_set(self, measurement, tag, value, constraint=None):
         if value and value != "None":
             return [value]
         return self.data_getter.get_tag_values(tag, measurement, constraint) + [""]
