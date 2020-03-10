@@ -98,6 +98,10 @@ class DataDownSampler:
 
     def _delete_and_write_points(self, measurement):
         logger.info("Deleting the old points")
+        if len(self.write_queue) == 0:
+            logger.info("No write were done so the deletion will be skipped")
+            return
+            
         self.data_getter.exec_query(REMOVE_POINT.format(**locals(), **vars(self)))
 
         logger.info("Writing the new downsampled values")
