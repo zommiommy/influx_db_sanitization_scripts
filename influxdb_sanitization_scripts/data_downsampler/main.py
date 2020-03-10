@@ -78,7 +78,7 @@ class DataDownSampler:
     def _interval_downsampler(self, measurement, start, end):
         self.write_queue = []
         for hostname, service, metric in product(self.hostnames, self.services, self.metrics):
-            logger.info("analyzing hostname:[%s] service:[%s] metric:[%s]", hostname, service, metric)
+            logger.info("analyzing measurement:[%s] hostname:[%s] service:[%s] metric:[%s]", measurement, hostname, service, metric)
             # Get the data
             df = get_clean_dataframe(self.data_getter, AGGREGATE.format(**locals(), **vars(self)))
 
