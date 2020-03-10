@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 from itertools import product
 from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby, time_chunks, epoch_to_time
 
-FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' OR metric = 'outBandwidth') AND time >= {high:d} AND time < {low:d}"""
+FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' OR metric = 'outBandwidth') AND hostname = '{hostname}' AND service = '{service}' AND time >= {high:d} AND time < {low:d}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND (metric = 'inBandwidth' OR metric = 'outBandwidth') AND time = {time}"""
 
 def chunks(lst, n):
@@ -54,43 +54,35 @@ class PeaksRemover:
     def peaks_remover(self):
         for low, high in time_chunks("0s", self.range, self.time_chunk):
             logger.info("Parsing the time intervals between %s and %s seconds since now", epoch_to_time(low / 1e9), epoch_to_time(high / 1e9))
-            data = self.data_getter.exec_query(FIND_QUERY.format(**{**vars(self), **locals()}))
-            self.parse_time_slot(data)
+            self.parse_time_slot(data, low, high)
 
-    def parse_time_slot(self, data):
-        df = pd.DataFrame(data)
-
-        logger.info("Got %d datapoints", len(df))
-
-        if len(df) == 0:
-            return 
-
-
-        df["pd_time"] = pd.to_datetime(df.time, unit="s")
-    
-        groups = {
-            key:val
-            for key, val in df.groupby(["hostname", "service", "metric"])
-        }
-
+    def parse_time_slot(self, data, low, high):
         for hostname in self.hostnames:
             services  = self.get_tag_set(self.measurement, "service", self.service, {"hostname":hostname}, False)
             logger.info("Found services %s", services)
             for service in services:
                 for metric in ["inBandwidth", "outBandwidth"]:
                     logger.info("Checking measurement [%s] hostname [%s] service [%s] metric [%s]", self.measurement, hostname, service, metric)
-                    self.parse_and_remove(groups[(hostname, service, metric)], dict(zip(["hostname", "service", "metric"], [hostname, service, metric])))
+                    self.parse_and_remove(low, high, dict(zip(["hostname", "service", "metric"], [hostname, service, metric])))
         
         
 
-    def parse_and_remove(self, data, indices):
+    def parse_and_remove(self, low, high, indices):
+        data = self.data_getter.exec_query(FIND_QUERY.format(**{**vars(self), **locals()}))
+        df = pd.DataFrame(data)
+        logger.info("Got %d datapoints", len(df))
+
+        if len(df) == 0:
+            return 
+
+        df["pd_time"] = pd.to_datetime(df.time, unit="s")
+
         groups = data.groupby(pd.Grouper(key="pd_time", freq=self.window))
 
         outliers = pd.concat([
             group[(group.value > self.max_value) & (group.value > self.coeff * group.value.mean())]
             for index, group in groups
         ])
-
 
         means = [
             group.value.mean()
