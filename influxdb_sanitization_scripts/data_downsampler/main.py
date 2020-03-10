@@ -70,7 +70,7 @@ class DataDownSampler:
             services  = self.get_tag_set(measurement, "service", self._service, False, {"hostname":hostname})
             logger.info("Found services %s", services)
             for service in services:
-                smetrics   = self.get_tag_set(measurement, "metric", None, False, {"hostname":hostname, "service":service})
+                metrics   = self.get_tag_set(measurement, "metric", None, False, {"hostname":hostname, "service":service})
                 logger.info("Found metrics %s", metrics)
                 for metric in metrics:
                     for i_start, i_end in time_chunks(self.time_start, self.time_end, self.interval):
