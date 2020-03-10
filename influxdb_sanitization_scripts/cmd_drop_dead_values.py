@@ -13,6 +13,7 @@ def cmd_test_drop_dead_values():
     parser.add_argument("-m", "--metric", type=str, default="None", help="The metric to select")
     parser.add_argument("-M", "--measurement", type=str, default="None", help="The measurement to select")
     parser.add_argument("-w", "--workers", type=int, default=1, help="How many query to execute in parallel")
+    parser.add_argument("-p", "--use-processes", type=bool, default=False, action="store_true", help="If the parallelization should use threads or processes")
     values = vars(parser.parse_args())
 
     common_callback(values)
@@ -21,5 +22,5 @@ def cmd_test_drop_dead_values():
     
     values["max_time"] = parse_time(values["max_time"])
 
-    ddv = DropDeadValues(dg, values.pop("dryrun"), values.pop("max_time"), values.pop("workers"))
+    ddv = DropDeadValues(dg, values.pop("dryrun"), values.pop("max_time"), values.pop("workers"), values.pop("use_processes"))
     ddv.drop_dead_values_dispatcher(**values)

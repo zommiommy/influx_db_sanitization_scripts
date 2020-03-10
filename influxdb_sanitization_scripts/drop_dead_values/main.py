@@ -2,7 +2,7 @@ from ..core import logger
 from itertools import product
 from ..core import DataGetter
 from humanize import naturaldelta
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 EXAMINE_TIME_INTERVAL = """SELECT * FROM "{measurement}" WHERE hostname = '{hostname}' AND service = '{service}' AND metric = '{metric}' AND time > now() - {time_delta_new}  AND time < now() - {time_delta_old} LIMIT 1"""
 DELETE_VALUES = """DELETE FROM "{measurement}" WHERE hostname = '{hostname}' AND service = '{service}' AND metric = '{metric}' """
@@ -23,10 +23,11 @@ def pair_times_scheduler(max_time, min_time=15*60):
 
 # In future we might want to add a blacklist or whitelist
 class DropDeadValues:
-    def __init__(self, data_getter : DataGetter, dryrun : bool, max_time : int, workers : int):
+    def __init__(self, data_getter : DataGetter, dryrun : bool, max_time : int, workers : int, use_processes : bool):
         self.dryrun = dryrun
         self.workers = workers
         self.max_time = max_time
+        self.use_processes = use_processes
         self.data_getter = data_getter
 
     def drop_dead_values_dispatcher(self, measurement, hostname, service, metric):
@@ -55,8 +56,13 @@ class DropDeadValues:
             logger.info("Found services %s", services)
             metrics   = self.get_tag_set(measurement, "metric", metric)
             logger.info("Found metrics %s", metrics)
+            
+            if self.use_processes:
+                pool = ProcessPoolExecutor
+            else:
+                pool = ThreadPoolExecutor
 
-            with ThreadPoolExecutor(max_workers=self.workers) as executor:
+            with pool(max_workers=self.workers) as executor:
                 for hostname, service, metric in product(hostnames, services, metrics):
                     executor.submit(self.drop_dead_values_specific, measurement, hostname, service, metric)
 
