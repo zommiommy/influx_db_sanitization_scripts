@@ -106,7 +106,7 @@ class PeaksRemover:
                         time=(int(outlier["time"]) * 1_000_000_000),
                         service=outlier["service"],
                         hostname=outlier["hostname"],
-                        metric=outliers["metric"]
+                        metric=outliers["metric"],
                         **vars(self)
                     )
                 )
