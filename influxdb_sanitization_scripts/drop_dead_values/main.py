@@ -55,7 +55,7 @@ def drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement,
         logger.info("Found metrics %s", metrics)
 
         for hostname, service, metric in product(hostnames, services, metrics):
-            logger.info("Analyzing %s %s %s %s", measurement, hostnames, service, metric)
+            logger.info("Analyzing %s %s %s %s", measurement, hostname, service, metric)
             drop_dead_values_specific(data_getter, dryrun, max_time, measurement, hostname, service, metric)
 
 def drop_dead_values_specific(data_getter, dryrun, max_time, measurement, hostname, service, metric):
