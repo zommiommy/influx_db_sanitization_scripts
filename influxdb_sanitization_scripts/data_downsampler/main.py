@@ -31,11 +31,15 @@ class DataDownSampler:
         end: str="2d",
         interval: str="1h",
         dryrun: bool = False,
-        backup: bool = False
+        backup: bool = False,
+        service: str = None,
+        hostname: str = None,
     ):
         self.backup = backup
         self.window = window
         self.dryrun = dryrun
+        self.service = service
+        self.hostname = hostname
         self.interval = interval
         self.data_getter = data_getter
         self.time_start, self.time_end = start, end
@@ -45,14 +49,28 @@ class DataDownSampler:
             logger.info("Working on measurement [%s]", measurement)
             self.downsample_single_measurement(measurement)
 
+    def get_tag_set(self, measurement, tag, value, constraint=None, nullable=True):
+        if value and value != "None":
+            return [value]
+        result = self.data_getter.get_tag_values(tag, measurement, constraint)
+        if nullable:
+            result += [""]
+        return result
+
+    def get_tags_to_parse(self, measurement):
+        self.hostnames = self.get_tag_set(measurement, "hostname", self.hostname, nullable=False)
+        logger.info("Found hostnames %s", self.hostnames)
+        self.services  = self.get_tag_set(measurement, "service", self.hostname, nullable=False)
+        logger.info("Found services %s", self.services)
+        self.metrics   = self.get_tag_set(measurement, "metric", self.hostname, nullable=False)
+        logger.info("Found metrics %s", self.metrics)
+
     def downsample_single_measurement(self, measurement):
         if self.backup:
             df = get_clean_dataframe(self.data_getter, BACKUP.format(**locals(), **vars(self)))
             df.to_csv(measurement + str(epoch_to_time(time())) + "_backup.csv")
 
-        self.hostnames = self.data_getter.get_tag_values("hostname", measurement) or [""]
-        self.services  = self.data_getter.get_tag_values("service",  measurement) or [""]
-        self.metrics   = self.data_getter.get_tag_values("metric",   measurement) or [""]
+        self.get_tags_to_parse(measurement)
 
         for i_start, i_end in time_chunks(self.time_start, self.time_end, self.interval):
             self._interval_downsampler(measurement, i_start, i_end) 

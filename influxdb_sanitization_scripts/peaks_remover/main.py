@@ -1,11 +1,13 @@
 
-import pandas as pd
+
 import time
+import pandas as pd
 from tqdm.auto import tqdm
+from itertools import product
 from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby, time_chunks, epoch_to_time
 
-FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' OR metric = 'outBandwidth') and time >= {high:d} and time < {low:d}"""
-REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND time = {time}"""
+FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' OR metric = 'outBandwidth') AND service = '{service}' AND hostname = '{hostname}' and time >= {high:d} and time < {low:d}"""
+REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND (metric = 'inBandwidth' OR metric = 'outBandwidth') AND time = {time}"""
 
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
@@ -25,10 +27,30 @@ class PeaksRemover:
         chunk_size: int = 1000,
         time_chunk: str = "6h",
         max_value: int = 1e8,
+        service: str = None,
+        hostname: str = None,
     ):
+        self.service, self.hostname = service, hostname
         self.data_getter, self.measurement = data_getter, measurement
         self.coeff, self.window, self.range, self.dryrun = coeff, window, range, dryrun
         self.chunk_size, self.time_chunk, self.max_value = chunk_size, time_chunk, max_value
+
+        self.get_tags_to_parse(measurement)
+
+
+    def get_tag_set(self, measurement, tag, value, constraint=None, nullable=True):
+        if value and value != "None":
+            return [value]
+        result = self.data_getter.get_tag_values(tag, measurement, constraint)
+        if nullable:
+            result += [""]
+        return result
+
+    def get_tags_to_parse(self, measurement):
+        self.hostnames = self.get_tag_set(measurement, "hostname", self.hostname, nullable=False)
+        logger.info("Found hostnames %s", self.hostnames)
+        self.services  = self.get_tag_set(measurement, "service", self.service, nullable=False)
+        logger.info("Found services %s", self.services)
 
 
     def peaks_remover(self):
@@ -48,8 +70,13 @@ class PeaksRemover:
 
         df["pd_time"] = pd.to_datetime(df.time, unit="s")
     
-        for indices, data in df.groupby(["hostname", "service", "metric"]):
-            self.parse_and_remove(data, dict(zip(["hostname", "service", "metric"], indices)))
+        groups = {
+            key:val
+            for key, val in df.groupby(["hostname", "service", "metric"])
+        }
+
+        for hostname, service, metric in product(self.hostname, self.services, ["inBandwidth", "outBandwidth"]):
+            self.parse_and_remove(groups[(hostname, service, metric)], dict(zip(["hostname", "service", "metric"], [hostname, service, metric])))
             
         
 

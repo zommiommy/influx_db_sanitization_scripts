@@ -15,6 +15,8 @@ def cmd_data_downsampler():
     parser = get_common_parser(description)
 
     parser.add_argument("-m", "--measurement", default=None, type=str, help="The measurement to use")
+    parser.add_argument("-H", "--hostname", type=str, default="None", help="The hostname to select")
+    parser.add_argument("-S", "--service", type=str, default="None", help="The service to select")
     parser.add_argument("-e", "--end",    type=str, help="Inclusive Upper-bound of the time to be parsed")
     parser.add_argument("-s", "--start",  type=str, help="Inclusive Lower-bound of the time to be parsed")
     parser.add_argument("-w", "--window", type=str, help="How big are the chunks with which the means are computed.")
