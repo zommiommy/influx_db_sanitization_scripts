@@ -43,10 +43,10 @@ class DropDeadValues:
         for measurement in measurements:
             self.drop_dead_values_per_measurement(measurement)
 
-    def get_tag_set(self, measurement, tag, value):
+    def get_tag_set(self, measurement, tag, value, constraint):
         if value and value != "None":
             return [value]
-        return self.data_getter.get_tag_values(tag, measurement) + [""]
+        return self.data_getter.get_tag_values(tag, measurement, constraint) + [""]
 
     def drop_dead_values_per_measurement(self, measurement, hostname=None, service=None, metric=None):
             
@@ -65,7 +65,10 @@ class DropDeadValues:
                     executor.submit(self.drop_dead_values_specific, measurement, hostname, service, metric)
 
     def drop_dead_values_specific(self, measurement, hostname, service, metric):
-        metrics = self.get_tag_set(measurement, "metric", metric)
+        if not metric:
+            metrics = self.get_tag_set(measurement, "metric", metric, {"hostname":hostname, "service":service})
+        else:
+            metrics = [metric]
         logger.info("Found metrics %s", metrics)
         for metric in metrics:
             logger.info("Analyzing %s %s %s %s", measurement, hostname, service, metric)
