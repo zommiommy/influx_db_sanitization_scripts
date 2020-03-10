@@ -18,7 +18,7 @@ def time_sample_scheduler(max_time, min_time=3600):
 
 
 def drop_dead_values_dispatcher(data_getter, dryrun, max_time, measurement, hostname, service, metric):
-    if measurement:
+    if measurement and measurement != "None":
         drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement, hostname, service, metric)
     else:
         drop_dead_values(data_getter, dryrun, max_time)
