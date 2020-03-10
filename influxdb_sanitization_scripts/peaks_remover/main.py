@@ -38,7 +38,7 @@ class PeaksRemover:
         self.get_tags_to_parse(measurement)
 
 
-    def get_tag_set(self, measurement, tag, value, constraint=None, nullable=True):
+    def get_tag_set(self, measurement, tag, value, constraint=None, nullable=True):indices
         if value and value != "None":
             return [value]
         result = self.data_getter.get_tag_values(tag, measurement, constraint)
@@ -68,7 +68,7 @@ class PeaksRemover:
         
 
     def parse_and_remove(self, low, high, indices):
-        data = self.data_getter.exec_query(FIND_QUERY.format(**{**vars(self), **locals()}))
+        data = self.data_getter.exec_query(FIND_QUERY.format(measurement=self.measurement, **{**indices, **locals()}))
         df = pd.DataFrame(data)
         logger.info("Got %d datapoints", len(df))
 
