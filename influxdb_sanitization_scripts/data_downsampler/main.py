@@ -86,7 +86,7 @@ class DataDownSampler:
 
         if len(df) == 0:
             logger.info("No data so this interval will be skipped")
-            continue
+            return
         # Add constant values
         tags = {
             "hostname":hostname,
