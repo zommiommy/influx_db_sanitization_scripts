@@ -38,8 +38,8 @@ class DataDownSampler:
         self.backup = backup
         self.window = window
         self.dryrun = dryrun
-        self.service = service
-        self.hostname = hostname
+        self._service = service
+        self._hostname = hostname
         self.interval = interval
         self.data_getter = data_getter
         self.time_start, self.time_end = start, end
@@ -58,11 +58,11 @@ class DataDownSampler:
         return result
 
     def get_tags_to_parse(self, measurement):
-        self.hostnames = self.get_tag_set(measurement, "hostname", self.hostname, nullable=False)
+        self.hostnames = self.get_tag_set(measurement, "hostname", self._hostname, nullable=False)
         logger.info("Found hostnames %s", self.hostnames)
-        self.services  = self.get_tag_set(measurement, "service", self.hostname, nullable=False)
+        self.services  = self.get_tag_set(measurement, "service", self._service, nullable=False)
         logger.info("Found services %s", self.services)
-        self.metrics   = self.get_tag_set(measurement, "metric", self.hostname, nullable=False)
+        self.metrics   = self.get_tag_set(measurement, "metric", None, nullable=False)
         logger.info("Found metrics %s", self.metrics)
 
     def downsample_single_measurement(self, measurement):
