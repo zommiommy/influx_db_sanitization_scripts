@@ -8,7 +8,7 @@ def cmd_test_drop_dead_values():
     parser = get_common_parser(description)
 
     parser.add_argument("-t", "--max-time", type=str, default="52w", help="Threshold time, if a measurement has no points newer than the threshold")
-    parser.add_argument("-h", "--hostname", type=str, default="None", help="The hostname to select")
+    parser.add_argument("-H", "--hostname", type=str, default="None", help="The hostname to select")
     parser.add_argument("-s", "--service", type=str, default="None", help="The service to select")
     parser.add_argument("-m", "--metric", type=str, default="None", help="The metric to select")
     parser.add_argument("-M", "--measurement", type=str, default="None", help="The measurement to select")
