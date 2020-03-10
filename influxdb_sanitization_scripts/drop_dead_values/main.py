@@ -8,11 +8,11 @@ from ..core import logger
 EXAMINE_TIME_INTERVAL = """SELECT * FROM "{measurement}" WHERE hostname = '{hostname}' AND service = '{service}' AND metric = '{metric}' AND time > now() - {time_delta} LIMIT 1"""
 DELETE_VALUES = """DELETE FROM "{measurement}" WHERE hostname = '{hostname}' AND service = '{service}' AND metric = '{metric}' """
 
-def time_sample_scheduler(max_time, min_time=3600):
+def time_sample_scheduler(max_time, min_time=15*60):
     t = min_time
     while t < max_time:
         yield "%ss"%int(t)
-        t *= 1.7
+        t *= 2
     
     yield "%ss"%int(max_time)
 
