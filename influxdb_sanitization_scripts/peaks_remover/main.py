@@ -75,7 +75,7 @@ class PeaksRemover:
 
         for hostname in self.hostname:
             services  = self.get_tag_set(self.measurement, "service", self.service, {"hostname":hostname}, False)
-            logger.debug("Found services %s", services)
+            logger.info("Found services %s", services)
             for service in services:
                 for metric in ["inBandwidth", "outBandwidth"]:
                     logger.info("Checking measurement [%s] hostname [%s] service [%s] metric [%s]", self.measurement, hostname, service, metric)
