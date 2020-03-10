@@ -69,7 +69,7 @@ class PeaksRemover:
         
 
     def parse_and_remove(self, low, high, indices):
-        data = self.data_getter.exec_query(FIND_QUERY.format(measurement=self.measurement, high=self.high, low=self.low, **indices))
+        data = self.data_getter.exec_query(FIND_QUERY.format(measurement=self.measurement, high=high, low=low, **indices))
         df = pd.DataFrame(data)
         logger.info("Got %d datapoints", len(df))
 
