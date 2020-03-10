@@ -33,12 +33,18 @@ def drop_dead_values(data_getter: DataGetter, dryrun: bool = True, max_time: int
     for measurement in measurements:
         drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement)
 
+def get_tag_set(data_getter, measurement, tag, value):
+    if value:
+        return [value]
+    return data_getter.get_tag_values(tag, measurement) or [""]
+
 def drop_dead_values_per_measurement(data_getter, dryrun, max_time, measurement, hostname=None, service=None, metric=None):
-        hostnames = [hostname] or data_getter.get_tag_values("hostname", measurement) or [""]
+        
+        hostnames = get_tag_set(data_getter, measurement, "hostname", hostname)
         logger.info("Found hostnames %s", hostnames)
-        services  = [service] or data_getter.get_tag_values("service",  measurement) or [""]
+        services = get_tag_set(data_getter, measurement, "service", service)
         logger.info("Found services %s", services)
-        metrics   = [metric] or data_getter.get_tag_values("metric",   measurement) or [""]
+        metrics = get_tag_set(data_getter, measurement, "metric", metric)
         logger.info("Found metrics %s", metrics)
 
         for hostname, service, metric in product(hostnames, services, metrics):
