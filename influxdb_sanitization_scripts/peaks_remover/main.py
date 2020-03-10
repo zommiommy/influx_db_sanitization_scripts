@@ -73,7 +73,7 @@ class PeaksRemover:
             for key, val in df.groupby(["hostname", "service", "metric"])
         }
 
-        for hostname in self.hostname:
+        for hostname in self.hostnames:
             services  = self.get_tag_set(self.measurement, "service", self.service, {"hostname":hostname}, False)
             logger.info("Found services %s", services)
             for service in services:
