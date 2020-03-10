@@ -63,12 +63,13 @@ class PeaksRemover:
             for service in services:
                 for metric in ["inBandwidth", "outBandwidth"]:
                     logger.info("Checking measurement [%s] hostname [%s] service [%s] metric [%s]", self.measurement, hostname, service, metric)
-                    self.parse_and_remove(low, high, dict(zip(["hostname", "service", "metric"], [hostname, service, metric])))
+                    tags = dict(zip(["hostname", "service", "metric"], [hostname, service, metric]))
+                    self.parse_and_remove(low, high, tags)
         
         
 
     def parse_and_remove(self, low, high, indices):
-        data = self.data_getter.exec_query(FIND_QUERY.format(measurement=self.measurement, **{**indices, **locals()}))
+        data = self.data_getter.exec_query(FIND_QUERY.format(measurement=self.measurement, high=self.high, low=self.low, **indices))
         df = pd.DataFrame(data)
         logger.info("Got %d datapoints", len(df))
 
