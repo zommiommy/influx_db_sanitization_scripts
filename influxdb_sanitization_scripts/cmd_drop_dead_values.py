@@ -27,7 +27,7 @@ def cmd_test_drop_dead_values():
         values.pop("dryrun"),
         values.pop("max_time"),
         values.pop("workers"),
-        values.pop("use_processes")
+        values.pop("use_processes"),
         values.pop("service_not_nullable")
     )
     ddv.drop_dead_values_dispatcher(**values)
