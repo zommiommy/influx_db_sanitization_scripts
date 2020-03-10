@@ -92,8 +92,8 @@ class PeaksRemover:
         if len(outliers) == 0:
             return
 
-        logger.info("Found %d outliers for %s", len(outliers), indices)
-        logger.info("These outliers were at %s", [epoch_to_time(x) for x in outliers.time.values])
+        logger.warn("Found %d outliers for %s", len(outliers), indices)
+        logger.warn("These outliers were at %s", [epoch_to_time(x) for x in outliers.time.values])
         logger.debug("outliers %s", outliers)
         logger.debug("means %s", means)
 
