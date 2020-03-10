@@ -5,7 +5,7 @@ from ..core import logger, DataGetter, get_filtered_labels, epoch_to_time, time_
 
 BACKUP       = """SELECT * FROM "{measurement}" WHERE time <= {start} AND time >= {end}"""
 AGGREGATE    = """SELECT MEAN(value) as "value" FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time <= {start} AND time >= {end} GROUP BY time({window}) """
-REMOVE_POINT = """DELETE FROM "{measurement}" WHERE time <= {start} AND time >= {end}"""
+REMOVE_POINT = """DELETE FROM "{measurement}" WHERE time <= {time_start} AND time >= {time_end}"""
 
 
 def get_clean_dataframe(data_getter, query):
@@ -57,47 +57,46 @@ class DataDownSampler:
             result += [""]
         return result
 
-    def get_tags_to_parse(self, measurement):
-        self.hostnames = self.get_tag_set(measurement, "hostname", self._hostname, nullable=False)
-        logger.info("Found hostnames %s", self.hostnames)
-        self.services  = self.get_tag_set(measurement, "service", self._service, nullable=False)
-        logger.info("Found services %s", self.services)
-        self.metrics   = self.get_tag_set(measurement, "metric", None, nullable=False)
-        logger.info("Found metrics %s", self.metrics)
-
     def downsample_single_measurement(self, measurement):
         if self.backup:
             df = get_clean_dataframe(self.data_getter, BACKUP.format(**locals(), **vars(self)))
             df.to_csv(measurement + str(epoch_to_time(time())) + "_backup.csv")
 
-        self.get_tags_to_parse(measurement)
-
-        for i_start, i_end in time_chunks(self.time_start, self.time_end, self.interval):
-            self._interval_downsampler(measurement, i_start, i_end) 
-
-    def _interval_downsampler(self, measurement, start, end):
         self.write_queue = []
-        for hostname, service, metric in product(self.hostnames, self.services, self.metrics):
-            logger.info("analyzing measurement:[%s] hostname:[%s] service:[%s] metric:[%s]", measurement, hostname, service, metric)
-            # Get the data
-            df = get_clean_dataframe(self.data_getter, AGGREGATE.format(**locals(), **vars(self)))
 
-            if len(df) == 0:
-                logger.info("No data so this interval will be skipped")
-                continue
-            # Add constant values
-            tags = {
-                "hostname":hostname,
-                "service" :service,
-                "metric"  :metric,
-            }
+        hostnames = self.get_tag_set(measurement, "hostname", self._hostname, nullable=False)
+        logger.info("Found hostnames %s", hostnames)
+        for hostname in hostnames:
+            services  = self.get_tag_set(measurement, "service", self._service, nullable=False, {"hostname":hostname})
+            logger.info("Found services %s", services)
+            for service in services:
+                smetrics   = self.get_tag_set(measurement, "metric", None, nullable=False, {"hostname":hostname, "service":service})
+                logger.info("Found metrics %s", metrics)
+                for metric in metrics:
+                    for i_start, i_end in time_chunks(self.time_start, self.time_end, self.interval):
+                        self._interval_downsampler(measurement, i_start, i_end, hostname, service, metric) 
+
+        self._delete_and_write_points(measurement)
+
         
-            self.write_queue.append((df, measurement, tags))
+    def _interval_downsampler(self, measurement, start, end):
+        logger.info("analyzing measurement:[%s] hostname:[%s] service:[%s] metric:[%s]", measurement, hostname, service, metric)
+        # Get the data
+        df = get_clean_dataframe(self.data_getter, AGGREGATE.format(**locals(), **vars(self)))
 
-        if len(self.window) == 0:
-            logger.info("The mesurement %s has no data so it's skipped", measurement)
-            return
+        if len(df) == 0:
+            logger.info("No data so this interval will be skipped")
+            continue
+        # Add constant values
+        tags = {
+            "hostname":hostname,
+            "service" :service,
+            "metric"  :metric,
+        }
+    
+        self.write_queue.append((df, measurement, tags))
 
+    def _delete_and_write_points(self, measurement):
         logger.info("Deleting the old points")
         self.data_getter.exec_query(REMOVE_POINT.format(**locals(), **vars(self)))
 
