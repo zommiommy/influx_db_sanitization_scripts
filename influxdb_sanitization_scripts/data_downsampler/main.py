@@ -64,13 +64,13 @@ class DataDownSampler:
 
         self.write_queue = []
 
-        hostnames = self.get_tag_set(measurement, "hostname", self._hostname, False)
+        hostnames = self.get_tag_set(measurement, "hostname", self._hostname, None, False)
         logger.info("Found hostnames %s", hostnames)
         for hostname in hostnames:
-            services  = self.get_tag_set(measurement, "service", self._service, False, {"hostname":hostname})
+            services  = self.get_tag_set(measurement, "service", self._service, {"hostname":hostname}, False)
             logger.info("Found services %s", services)
             for service in services:
-                metrics   = self.get_tag_set(measurement, "metric", None, False, {"hostname":hostname, "service":service})
+                metrics   = self.get_tag_set(measurement, "metric", None, {"hostname":hostname, "service":service}, False)
                 logger.info("Found metrics %s", metrics)
                 
                 for metric in metrics:
