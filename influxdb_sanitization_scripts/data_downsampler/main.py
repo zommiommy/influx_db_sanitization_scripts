@@ -12,7 +12,7 @@ def get_clean_dataframe(data_getter, query):
     data = data_getter.exec_query(query)
     # Setup the dataframe
     df = pd.DataFrame(data)
-    logger.info("Got %d datapoints", len(df))
+    logger.debug("Got %d datapoints", len(df))
     if len(df) == 0:
         return []
     # ensure that all values are floats
