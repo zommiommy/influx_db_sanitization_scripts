@@ -64,7 +64,7 @@ class DropDeadValues:
 
             with pool(max_workers=self.workers) as executor:
                 for hostname in hostnames:
-                    services  = self.get_tag_set(measurement, "service", service, {"hostname":hostname}, self.service_not_nullable)
+                    services  = self.get_tag_set(measurement, "service", service, {"hostname":hostname}, not self.service_not_nullable)
                     logger.info("Found services %s for hostname %s", services, hostname)
                     for service in services:
                         executor.submit(self.drop_dead_values_specific, measurement, hostname, service, metric)
