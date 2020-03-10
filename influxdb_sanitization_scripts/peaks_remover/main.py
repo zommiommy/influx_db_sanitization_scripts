@@ -6,8 +6,8 @@ from tqdm.auto import tqdm
 from itertools import product
 from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby, time_chunks, epoch_to_time
 
-FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' OR metric = 'outBandwidth') AND hostname = '{hostname}' AND service = '{service}' AND time >= {high:d} AND time < {low:d}"""
-REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND (metric = 'inBandwidth' OR metric = 'outBandwidth') AND time = {time}"""
+FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE metric = '{metric}' AND hostname = '{hostname}' AND service = '{service}' AND time >= {high:d} AND time < {low:d}"""
+REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time = {time}"""
 
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
@@ -54,9 +54,9 @@ class PeaksRemover:
     def peaks_remover(self):
         for low, high in time_chunks("0s", self.range, self.time_chunk):
             logger.info("Parsing the time intervals between %s and %s seconds since now", epoch_to_time(low / 1e9), epoch_to_time(high / 1e9))
-            self.parse_time_slot(data, low, high)
+            self.parse_time_slot(low, high)
 
-    def parse_time_slot(self, data, low, high):
+    def parse_time_slot(self, low, high):
         for hostname in self.hostnames:
             services  = self.get_tag_set(self.measurement, "service", self.service, {"hostname":hostname}, False)
             logger.info("Found services %s", services)
@@ -105,6 +105,7 @@ class PeaksRemover:
                         time=(int(outlier["time"]) * 1_000_000_000),
                         service=outlier["service"],
                         hostname=outlier["hostname"],
+                        metric=outliers["metric"]
                         **vars(self)
                     )
                 )
