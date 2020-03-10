@@ -107,6 +107,7 @@ class PeaksRemover:
                         service=outlier["service"],
                         hostname=outlier["hostname"],
                         metric=outliers["metric"],
+                        measurement=self.measurement,
                     )
                 )
 
