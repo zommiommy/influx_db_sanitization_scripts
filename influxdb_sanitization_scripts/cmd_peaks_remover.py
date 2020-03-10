@@ -2,8 +2,17 @@ import logging
 from .core import DataGetter, get_common_parser, common_callback
 from .peaks_remover import PeaksRemover
 
-description = """This scripts calculate the mean in 2 hours windows of data and remove peaks that are 3 times bigger than the mean of its window.
-The values are configurable."""
+description = """
+Example:
+./peaks_remover -v 2 -c 30 -w 4h -r 1d -t 4h check_iftraffic64 -f -m 100000000
+
+This scripts calculate the mean in 4 hours windows of data on 
+the measurement check_iftraffic64 and remove peaks 
+that are 100000000 times bigger than the mean of its window.
+The queries will be divided in chunks of 4 hours and set the verbosity
+to 2 (INFO).
+Since -f is passed, no security prompt will be shown.
+"""
 
 def cmd_peaks_remover():
     parser = get_common_parser(description)

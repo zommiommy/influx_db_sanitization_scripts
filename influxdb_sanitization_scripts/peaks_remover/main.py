@@ -49,7 +49,7 @@ class PeaksRemover:
         df["pd_time"] = pd.to_datetime(df.time, unit="s")
     
         for indices, data in df.groupby(["hostname", "service"]):
-            self.parse_and_remove(data, dict(zip(indices, indices)))
+            self.parse_and_remove(data, dict(zip(["hostname", "service"], indices)))
             
         
 
