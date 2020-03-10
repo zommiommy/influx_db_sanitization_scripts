@@ -3,7 +3,13 @@ from time import sleep
 from .core import DataGetter, get_common_parser, common_callback, validate_time, ask_user_to_continue
 from .data_downsampler import DataDownSampler
 
-description = """This scripts take the values between 6 month and 2 years and downsample them by aggregating values from windows of 15 minutes."""
+description = """
+Example
+./data_downsampler -v 2 -w 15m -s 26w -e 52w
+
+This scripts take the values between 26 weeks and 52 weeks from now
+and downsample them by aggregating values from windows of 15 minutes
+and set the verbosity to 2 (INFO)"""
 
 def cmd_data_downsampler():
     parser = get_common_parser(description)

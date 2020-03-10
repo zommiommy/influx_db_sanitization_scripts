@@ -2,7 +2,15 @@ import logging
 from .core import DataGetter, get_common_parser, common_callback, parse_time
 from .drop_dead_values import DropDeadValues
 
-description = """If a tag had no new data in the last x years, drop the values from the measurement (grouped by hostname, service, and metric)."""
+description = """
+Example:
+./drop_dead_values -dr -t 15w -v 1 -w 5 -M ping -snn
+
+If had no new data in the last 15 weeks on the measurement "ping"
+drop the values (grouped by hostname, service, and metric).
+Set verbosity to 1 (WARNING) and set 5 workers for parallel analysis.
+-ssn since in this case the service tag can't be null.
+"""
 
 def cmd_test_drop_dead_values():
     parser = get_common_parser(description)
