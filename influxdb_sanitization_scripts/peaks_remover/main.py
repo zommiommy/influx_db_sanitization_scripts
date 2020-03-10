@@ -38,7 +38,7 @@ class PeaksRemover:
         self.get_tags_to_parse(measurement)
 
 
-    def get_tag_set(self, measurement, tag, value, constraint=None, nullable=True):indices
+    def get_tag_set(self, measurement, tag, value, constraint=None, nullable=True):
         if value and value != "None":
             return [value]
         result = self.data_getter.get_tag_values(tag, measurement, constraint)
