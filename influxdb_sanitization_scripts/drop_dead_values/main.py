@@ -1,5 +1,3 @@
-import pandas as pd
-from time import time
 from ..core import logger
 from itertools import product
 from ..core import DataGetter
@@ -25,7 +23,6 @@ def pair_times_scheduler(max_time, min_time=15*60):
 
 # In future we might want to add a blacklist or whitelist
 class DropDeadValues:
-
     def __init__(self, data_getter : DataGetter, dryrun : bool, max_time : int, workers : int):
         self.dryrun = dryrun
         self.workers = workers

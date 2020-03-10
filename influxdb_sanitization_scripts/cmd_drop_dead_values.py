@@ -1,6 +1,6 @@
 import logging
 from .core import DataGetter, get_common_parser, common_callback, parse_time
-from .drop_dead_values import drop_dead_values_dispatcher
+from .drop_dead_values import DropDeadValues
 
 description = """If a tag had no new data in the last x years, drop the values from the measurement (grouped by hostname, service, and metric)."""
 
@@ -21,4 +21,5 @@ def cmd_test_drop_dead_values():
     
     values["max_time"] = parse_time(values["max_time"])
 
-    drop_dead_values_dispatcher(dg, **values)
+    ddv = DropDeadValues(dg, values.pop("dryrun"), values.pop("max_time"), values.pop("workers"))
+    ddv.drop_dead_values_dispatcher(**values)

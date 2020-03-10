@@ -1,5 +1,5 @@
-from .main import drop_dead_values_dispatcher
+from .main import DropDeadValues
 
 __all__ = [
-    "drop_dead_values_dispatcher"
+    "DropDeadValues"
 ]
