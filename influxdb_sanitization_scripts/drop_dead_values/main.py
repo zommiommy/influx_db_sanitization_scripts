@@ -46,7 +46,7 @@ class DropDeadValues:
     def get_tag_set(self, measurement, tag, value):
         if value and value != "None":
             return [value]
-        return self.data_getter.get_tag_values(tag, measurement) or [""]
+        return self.data_getter.get_tag_values(tag, measurement) + [""]
 
     def drop_dead_values_per_measurement(self, measurement, hostname=None, service=None, metric=None):
             
