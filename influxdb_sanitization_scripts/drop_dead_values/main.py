@@ -72,6 +72,5 @@ class DropDeadValues:
                 break
         else:   
             logger.warn("Not found values for measurement %s hostname %s service %s metric %s",  measurement, hostname, service, metric)
-            logger.warn("Going to delete the values")
             if not self.dryrun:
                 self.data_getter.exec_query(DELETE_VALUES.format(**locals()))
