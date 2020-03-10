@@ -71,7 +71,7 @@ class PeaksRemover:
             return
 
         logger.info("Found %d outliers for %s", len(outliers), indices)
-        logger.info("These outliers were at %s", list(outliers.time.values()))
+        logger.info("These outliers were at %s", list(outliers.time.values)
         logger.debug("outliers %s", outliers)
         logger.debug("means %s", means)
 
