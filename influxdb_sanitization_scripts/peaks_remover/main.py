@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 from itertools import product
 from ..core import logger, DataGetter, get_filtered_labels, consistent_groupby, time_chunks, epoch_to_time
 
-FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' OR metric = 'outBandwidth') AND service = '{service}' AND hostname = '{hostname}' and time >= {high:d} and time < {low:d}"""
+FIND_QUERY = """SELECT time, service, hostname, value, metric FROM {measurement} WHERE (metric = 'inBandwidth' OR metric = 'outBandwidth') AND time >= {high:d} AND time < {low:d}"""
 REMOVE_POINT = """DELETE FROM {measurement} WHERE service = '{service}' AND hostname = '{hostname}' AND (metric = 'inBandwidth' OR metric = 'outBandwidth') AND time = {time}"""
 
 def chunks(lst, n):
