@@ -23,12 +23,13 @@ def pair_times_scheduler(max_time, min_time=15*60):
 
 # In future we might want to add a blacklist or whitelist
 class DropDeadValues:
-    def __init__(self, data_getter : DataGetter, dryrun : bool, max_time : int, workers : int, use_processes : bool):
+    def __init__(self, data_getter : DataGetter, dryrun : bool, max_time : int, workers : int, use_processes : bool, service_not_nullable: bool):
         self.dryrun = dryrun
         self.workers = workers
         self.max_time = max_time
         self.use_processes = use_processes
         self.data_getter = data_getter
+        self.service_not_nullable = service_not_nullable
 
     def drop_dead_values_dispatcher(self, measurement, hostname, service, metric):
         if measurement and measurement != "None":
@@ -63,7 +64,7 @@ class DropDeadValues:
 
             with pool(max_workers=self.workers) as executor:
                 for hostname in hostnames:
-                    services  = self.get_tag_set(measurement, "service", service, {"hostname":hostname})
+                    services  = self.get_tag_set(measurement, "service", service, {"hostname":hostname}, self.service_not_nullable)
                     logger.info("Found services %s for hostname %s", services, hostname)
                     for service in services:
                         executor.submit(self.drop_dead_values_specific, measurement, hostname, service, metric)
