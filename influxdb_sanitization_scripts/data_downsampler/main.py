@@ -72,7 +72,9 @@ class DataDownSampler:
             for service in services:
                 metrics   = self.get_tag_set(measurement, "metric", None, False, {"hostname":hostname, "service":service})
                 logger.info("Found metrics %s", metrics)
+                
                 for metric in metrics:
+                    logger.info("analyzing measurement:[%s] hostname:[%s] service:[%s] metric:[%s]", measurement, hostname, service, metric)
                     for i_start, i_end in time_chunks(self.time_start, self.time_end, self.interval):
                         self._interval_downsampler(measurement, i_start, i_end, hostname, service, metric) 
 
@@ -80,12 +82,11 @@ class DataDownSampler:
 
         
     def _interval_downsampler(self, measurement, start, end, hostname, service, metric):
-        logger.info("analyzing measurement:[%s] hostname:[%s] service:[%s] metric:[%s]", measurement, hostname, service, metric)
+        
         # Get the data
         df = get_clean_dataframe(self.data_getter, AGGREGATE.format(**locals(), **vars(self)))
 
         if len(df) == 0:
-            logger.info("No data so this interval will be skipped")
             return
         # Add constant values
         tags = {
@@ -93,7 +94,6 @@ class DataDownSampler:
             "service" :service,
             "metric"  :metric,
         }
-    
         self.write_queue.append((df, measurement, tags))
 
     def _delete_and_write_points(self, measurement):
@@ -101,7 +101,7 @@ class DataDownSampler:
         if len(self.write_queue) == 0:
             logger.info("No write were done so the deletion will be skipped")
             return
-            
+
         self.data_getter.exec_query(REMOVE_POINT.format(**locals(), **vars(self)))
 
         logger.info("Writing the new downsampled values")
