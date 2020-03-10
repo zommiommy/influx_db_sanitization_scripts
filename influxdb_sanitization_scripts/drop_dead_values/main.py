@@ -52,8 +52,6 @@ class DropDeadValues:
             
             hostnames = self.get_tag_set(measurement, "hostname", hostname)
             logger.info("Found hostnames %s", hostnames)
-            services  = self.get_tag_set(measurement, "service", service)
-            logger.info("Found services %s", services)
             
             if self.use_processes:
                 pool = ProcessPoolExecutor
@@ -61,8 +59,11 @@ class DropDeadValues:
                 pool = ThreadPoolExecutor
 
             with pool(max_workers=self.workers) as executor:
-                for hostname, service in product(hostnames, services):
-                    executor.submit(self.drop_dead_values_specific, measurement, hostname, service, metric)
+                for hostname in hostnames:
+                    services  = self.get_tag_set(measurement, "service", service, {"hostname":hostnames})
+                    logger.info("Found services %s", services)
+                    for service in services:
+                        executor.submit(self.drop_dead_values_specific, measurement, hostname, service, metric)
 
     def drop_dead_values_specific(self, measurement, hostname, service, metric):
         if not metric or metric == "None":
