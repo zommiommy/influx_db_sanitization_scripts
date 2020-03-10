@@ -5,7 +5,7 @@ from ..core import logger, DataGetter, get_filtered_labels, epoch_to_time, time_
 
 BACKUP       = """SELECT * FROM "{measurement}" WHERE time <= {start} AND time >= {end}"""
 AGGREGATE    = """SELECT MEAN(value) as "value" FROM "{measurement}" WHERE service = '{service}' AND hostname = '{hostname}' AND metric = '{metric}' AND time <= {start} AND time >= {end} GROUP BY time({window}) """
-REMOVE_POINT = """DELETE FROM "{measurement}" WHERE time <= {time_start} AND time >= {time_end}"""
+REMOVE_POINT = """DELETE FROM "{measurement}" WHERE time <= now() - {time_start} AND time >= now() - {time_end}"""
 
 
 def get_clean_dataframe(data_getter, query):
